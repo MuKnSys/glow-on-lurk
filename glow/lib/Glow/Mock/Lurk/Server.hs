@@ -31,6 +31,9 @@ import Data.Maybe (fromMaybe)
 
 import Data.Aeson (encodeFile,decodeFileStrict)
 
+--pawel
+import System.Directory (doesFileExist)
+
 instance Parsable UUID where
   parseParam = maybe (Left (pack "Unable to read UUID")) Right  . fromText . toStrict
   
@@ -53,7 +56,6 @@ runServer = scotty 3000 $ do
   get "/demo/loadCoinFlip" $ atC (put coinFlipConsensusState) >> text "done"
   get "/demo/validCall0" $
       atC (do let c = (Call 1 (LedgerPubKey "A") (Publish (DigestOf (GLNat 7))))
-              
               interactWithContract nil c
               CM.get)
       >>= json
@@ -66,9 +68,13 @@ runServer = scotty 3000 $ do
 
     -- TODO : handle non existing file!
     loadConsensusState :: IO ConsensusState
-    loadConsensusState =
-        fromMaybe initialConsensusState <$> decodeFileStrict consensusStatePath
-        
+    loadConsensusState = do
+                            doesFile <- doesFileExist consensusStatePath
+                            if doesFile
+                               then  return ()
+                               else  writeFile consensusStatePath ""
+                            fromMaybe initialConsensusState <$> decodeFileStrict consensusStatePath
+
 
     saveConsensusState :: ConsensusState -> IO () 
     saveConsensusState = encodeFile consensusStatePath
