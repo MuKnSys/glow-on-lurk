@@ -1,3 +1,4 @@
+
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE RankNTypes #-}
@@ -181,7 +182,7 @@ overrideConsensusState :: ConsensusState -> CMS ()
 overrideConsensusState x = put x
 
 lurkExecutable :: FilePath
-lurkExecutable = "/Users/marcin/lurk-rs/target/release/fcomm"
+lurkExecutable = "/home/pawel/Desktop/lurk-rs/target/release/fcomm"
 
 tempLurkSourceFile :: FilePath
 tempLurkSourceFile = "/tmp/tempLurkSourceFile.json"
