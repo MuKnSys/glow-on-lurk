@@ -88,3 +88,4 @@ runServer = scotty 3000 $ do
         -- putStrLn $ show s'
         saveConsensusState s'
         return a
+

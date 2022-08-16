@@ -75,6 +75,7 @@ common shared-opts
     , http-types
     , req
     , cryptonite
+    , directory >= 1.3
   default-language:    Haskell2010
 
 library
@@ -121,12 +122,14 @@ library
 
     , Glow.Runtime.Interaction.InterpretAnf    
     , Glow.Runtime.Interaction.InteractWithServer
+    , Glow.Runtime.Interaction.InteractWithServerOneStep
     , Glow.Runtime.Interaction.BuiltIns
     , Glow.Runtime.Interaction.Interact
-
+   
 executable glow
   import: shared-opts
-  build-depends: glow,
+  build-depends: directory >= 1.3.6.2,
+                 glow,
                  http-client >= 0.7.11,
                  lens >= 5.1
   hs-source-dirs: exe
@@ -134,7 +137,8 @@ executable glow
 
 executable lurk-consensus-mock
   import: shared-opts
-  build-depends: glow,
+  build-depends: directory >= 1.3.6.2,
+                 glow,
                  http-client >= 0.7.11,
                  lens >= 5.1
   hs-source-dirs: exe
@@ -142,7 +146,8 @@ executable lurk-consensus-mock
 
 executable run-glow
   import: shared-opts
-  build-depends: glow,
+  build-depends: directory >= 1.3.6.2,
+                 glow,
                  http-client >= 0.7.11,
                  lens >= 5.1
   hs-source-dirs: exe

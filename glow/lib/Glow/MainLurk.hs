@@ -15,6 +15,7 @@ import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey))
 
 import Glow.Runtime.Lurk.Commands
 import Glow.Runtime.Interaction.InteractWithServer
+import qualified Glow.Runtime.Interaction.InteractWithServerOneStep as OS
 import Glow.Runtime.Interaction.Interact
 import Data.UUID as UUID
 import Data.Maybe (fromJust)
@@ -49,7 +50,17 @@ main = do
                  (LedgerPubKey (pack pubK))
                  (pack role)
                  params) (fromJust $ UUID.fromString cid) 
-       
+    ("interact-cli" : file : cid : pubK : role : paramsS : i : _) -> do 
+        pc <- precomp file
+        let params = read paramsS
+        putStrLn $ show params
+        void $ OS.runInteractionWithServer
+                (LocalInteractEnv
+                 pc
+                 (LedgerPubKey (pack pubK))
+                 (pack role)
+                 params) (fromJust $ UUID.fromString cid) i
+
     _ -> putStrLn "unrecognized args"
 
 

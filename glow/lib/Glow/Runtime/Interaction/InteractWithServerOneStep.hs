@@ -9,7 +9,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
-module Glow.Runtime.Interaction.InteractWithServer where
+module Glow.Runtime.Interaction.InteractWithServerOneStep where
 
 import Glow.Consensus.Lurk
 
@@ -61,11 +61,12 @@ import Glow.Runtime.Interaction.Interact
 
 import Network.HTTP.Req
 import qualified Data.ByteString.Char8 as B
-    
+import System.Exit
 data WithServerIEnv = WithServerIEnv
      { _wsieLocalInteractEnv :: LocalInteractEnv
      , _wsieUUID :: UUID
      , _wsieLastCall :: Maybe Call
+     , _wsieInput :: String
      -- , _wsieHost :: String
      -- , _wsiePort :: Int 
      }
@@ -74,11 +75,14 @@ makeLenses ''WithServerIEnv
 
 type CmdLineWithServer = RWST WithServerIEnv () LocalState IO
 
+feedInput :: CmdLineWithServer String
+feedInput = asks (^. wsieInput)
+
 instance ParticipantM CmdLineWithServer LocalState where
   env = asks (^. wsieLocalInteractEnv)
 
   localState _ = id
-
+ 
   getConsensusState = do 
     cId <- asks (^. wsieUUID)
     e <- env
@@ -89,10 +93,9 @@ instance ParticipantM CmdLineWithServer LocalState where
                             NoReqBody  (jsonResponse) (port 3000)
             case (responseBody x) of
                 Nothing -> error "unable to get consensus state!"
-                Just y -> do _ <- liftIO getLine
-                             return y
+                Just y -> return y
 
-  sendCall c = do 
+  sendCall c = do
     cId <- asks (^. wsieUUID)
     liftIO $
         runReq defaultHttpConfig $ void $ do
@@ -100,12 +103,15 @@ instance ParticipantM CmdLineWithServer LocalState where
                             (ReqBodyJson c) ignoreResponse (port 3000)
 
 
-  onWait = void $ liftIO getLine
+  onWait = do
+    liftIO $ putStrLn "Nothing to do"
+    liftIO exitSuccess
 
   onError s = error s
 
   afterCall cl = do
-    void $ liftIO getLine
+    liftIO $ putStrLn "Call sent"
+    liftIO exitSuccess
     -- lc <- asks (^. wsieLastCall)
     -- if (lc == Just cl)
     -- then liftIO $ ((putStrLn "call failed, press enter to repeat") >> void getLine)
@@ -114,19 +120,19 @@ instance ParticipantM CmdLineWithServer LocalState where
   promptInput msg ty = do
     liftIO $ do putStrLn (show msg)
                 putStrLn (show ty)
-    liftIO $ case ty of
-                     GLNatT -> GLNat <$> readLn
-                     GLBoolT -> GLBool <$> readLn
-                     GLPFT  -> GLPF <$> readLn
-                     DigestT  -> DigestOf <$> readLn
+    case ty of
+                     GLNatT -> GLNat <$> (read <$> feedInput)
+                     GLBoolT -> GLBool <$> (read <$> feedInput)
+                     GLPFT  -> GLPF <$> (read <$> feedInput)
+                     DigestT  -> DigestOf <$> (read <$> feedInput)
                      GLUnitT -> return GLUnit
     -- case readMaybe l of
     --   Nothing -> promptInput msg ty
     --   Just x -> return x
     
         
-runInteractionWithServer :: LocalInteractEnv -> UUID -> IO ()
-runInteractionWithServer lie cid =
+runInteractionWithServer :: LocalInteractEnv -> UUID -> String -> IO ()
+runInteractionWithServer lie cid i =
   void (runRWST (runInteraction (Proxy :: Proxy LocalState) (Proxy :: Proxy CmdLineWithServer))
-         (WithServerIEnv lie cid Nothing) initialLocalState)
+         (WithServerIEnv lie cid Nothing i) initialLocalState)
   
