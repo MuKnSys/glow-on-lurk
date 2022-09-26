@@ -1,0 +1,1052 @@
+
+./exe/LurkConsensusMock.hs,37
+module Main Main0,1
+main main4,5
+
+./exe/RunGlow.hs,37
+module Main Main0,1
+main main4,5
+
+./exe/Main.hs,37
+module Main Main0,1
+main main4,5
+
+./tests/Tests/Parser.hs,126
+module Tests.Parser Tests.Parser0,1
+tests tests9,10
+mkParseTest mkParseTest237,238
+checkExamples checkExamples246,247
+
+./tests/Tests/FunctionLift.hs,69
+module Tests.FunctionLift Tests.FunctionLift0,1
+tests tests12,13
+
+./tests/Tests/Runtime/Interaction.hs,82
+module Tests.Runtime.Interaction Tests.Runtime.Interaction0,1
+tests tests9,10
+
+./tests/Tests/AstCommon.hs,61
+module Tests.AstCommon Tests.AstCommon0,1
+tests tests6,7
+
+./tests/Tests/Lurk.hs,76
+module Tests.Lurk Tests.Lurk0,1
+tests tests8,9
+examples examples14,15
+
+./tests/Tests/Fresh.hs,54
+module Tests.Fresh Tests.Fresh0,1
+tests tests9,10
+
+./tests/Main.hs,39
+module Main Main0,1
+main main11,12
+
+./lib/Glow/Parser.hs,668
+module Glow.Parser Glow.Parser1,2
+type Parser Parser15,16
+whitespace whitespace17,18
+lexeme lexeme24,25
+symbol symbol27,28
+ident ident31,32
+literal literal40,41
+litBool litBool49,50
+litNat litNat54,55
+litStr litStr76,77
+expr expr103,104
+literalExpr literalExpr114,115
+identExpr identExpr117,118
+bodyExpr bodyExpr120,121
+lambdaExpr lambdaExpr142,143
+lambda lambda145,146
+paramList paramList157,158
+fnParam fnParam160,161
+typ typ181,182
+recordExpr recordExpr184,185
+recordExprEntry recordExprEntry192,193
+stmt stmt200,201
+letStmt letStmt208,209
+exprStmt exprStmt216,217
+stmtList stmtList219,220
+program program223,224
+
+./lib/Glow/Gerbil/ParseCommon.hs,582
+module Glow.Gerbil.ParseCommon Glow.Gerbil.ParseCommon3,4
+pattern Builtin Builtin14,15
+pattern Builtin head head15,16
+pattern Pair Pair17,18
+pattern Pair fst fst18,19
+parseTypeTable parseTypeTable22,23
+parseTable parseTable25,26
+parseKV parseKV29,30
+parseQuoteId parseQuoteId34,35
+parseType parseType38,39
+parseVariant parseVariant56,57
+parseAssetMap parseAssetMap60,61
+parseExpression parseExpression66,67
+mkId mkId87,88
+var var90,91
+parseName parseName93,94
+parseTrivialExpression parseTrivialExpression102,103
+parsePattern parsePattern112,113
+
+./lib/Glow/Gerbil/Types.hs,3109
+module Glow.Gerbil.Types Glow.Gerbil.Types9,10
+type GlowProjectContract GlowProjectContract19,20
+type VariableMap VariableMap21,22
+type DatatypeMap DatatypeMap23,24
+type AssetMap AssetMap25,26
+type ExecutionPoint ExecutionPoint27,28
+type Record Record29,30
+data TypeType32,33
+  = TyArrow TyArrow33,34
+  | TyName TyName34,35
+  | TyNameSubtype TyNameSubtype35,36
+  | TyTuple TyTuple36,37
+  | TyVar TyVar37,38
+  | TyApp TyApp38,39
+  | TyRecord TyRecord39,40
+    TyUnknown TyUnknown43,44
+data Statement Statement47,48
+  = Label Label48,49
+  | DebugLabel DebugLabel49,50
+  | DefineInteraction DefineInteraction50,51
+  | Define Define51,52
+  | DefineFunction DefineFunction52,53
+    DefineType DefineType56,57
+  | DefineDatatype DefineDatatype57,58
+  | AtParticipant AtParticipant58,59
+  | SetParticipant SetParticipant59,60
+  | Publish Publish60,61
+  | Deposit Deposit61,62
+  | Withdraw Withdraw62,63
+  | Ignore Ignore63,64
+  | Require Require64,65
+  | Return Return65,66
+  | Switch Switch66,67
+data AnfInteractionDef AnfInteractionDef69,70
+data AnfInteractionDef pt = AnfInteractionDefAnfInteractionDef69,70
+  { aidParticipantNames aidParticipantNames70,71
+    aidAssetNames aidAssetNames71,72
+    aidArgumentNames aidArgumentNames72,73
+    aidBody aidBody73,74
+type AnfStatement AnfStatement80,81
+data ProjectInteractionDef ProjectInteractionDef82,83
+data ProjectInteractionDef pt = ProjectInteractionDefProjectInteractionDef82,83
+  { pidParticipantNames pidParticipantNames83,84
+    pidAssetNames pidAssetNames84,85
+    pidArgumentNames pidArgumentNames85,86
+    pidInteractions pidInteractions86,87
+type ProjectStatement ProjectStatement90,91
+data Variant Variant93,94
+data Variant = Variant Variant93,94
+data ExpressionExpression96,97
+  = ExpectPublished ExpectPublished97,98
+  | Digest Digest98,99
+  | Sign Sign99,100
+  | Input Input100,101
+  | EqlExpr EqlExpr101,102
+  | AppExpr AppExpr102,103
+  | TrvExpr TrvExpr103,104
+data PureExpressionPureExpression106,107
+  = PDigest PDigest107,108
+  | PEqlExpr PEqlExpr108,109
+  | PAppExpr PAppExpr109,110
+  | PTrvExpr PTrvExpr110,111
+toPure toPure113,114
+fromPure fromPure123,124
+data GlowValueGlowValue130,131
+  = Constructor Constructor131,132
+  | PubKey PubKey132,133
+  | Signature Signature133,134
+  | ByteString ByteString134,135
+  | Integer Integer135,136
+  | Boolean Boolean136,137
+  | UnitUnit137,138
+constantToValue constantToValue140,141
+constantToTypedValue constantToTypedValue147,148
+data PatPat155,156
+  = PTypeAnno PTypeAnno156,157
+  | PVar PVar157,158
+  | PAppCtor PAppCtor158,159
+  | PWildPWild159,160
+  | PList PList160,161
+  | PTuple PTuple161,162
+  | PRecord PRecord162,163
+  | POr POr163,164
+  | PConst PConst164,165
+newtype LedgerPubKey LedgerPubKey167,168
+newtype LedgerPubKey = LedgerPubKey { lpkBS lpkBS167,168
+newtype LedgerPrivKey LedgerPrivKey171,172
+newtype LedgerPrivKey = LedgerPrivKey { lprkBS lprkBS171,172
+newtype LedgerSignature LedgerSignature176,177
+
+./lib/Glow/Gerbil/ParseProject.hs,790
+module Glow.Gerbil.ParseProject Glow.Gerbil.ParseProject14,15
+parseRawCreateParams parseRawCreateParams39,40
+parseRawMoveParams parseRawMoveParams64,65
+parseCommandPath parseCommandPath77,78
+parseCommandDebug parseCommandDebug95,96
+prettyContract prettyContract114,115
+parseModule parseModule126,127
+parseStatement parseStatement134,135
+parseSwitchCase parseSwitchCase210,211
+parseInteraction parseInteraction215,216
+parseVariableMap parseVariableMap224,225
+data GlowProgram GlowProgram261,262
+data GlowProgram = GlowProgramGlowProgram261,262
+  { _participants _participants262,263
+    _arguments _arguments263,264
+    _consensusProgram _consensusProgram264,265
+    _participantPrograms _participantPrograms265,266
+extractPrograms extractPrograms269,270
+
+./lib/Glow/Gerbil/Client/Types.hs,902
+module Glow.Gerbil.Client.Types Glow.Gerbil.Client.Types4,5
+type SExprString SExprString13,14
+data RawCreateParams RawCreateParams19,20
+data RawCreateParams = RawCreateParamsRawCreateParams19,20
+  { source source20,21
+    initialVariableMap initialVariableMap21,22
+    rawTimeoutLength rawTimeoutLength22,23
+data RawMoveParams RawMoveParams27,28
+data RawMoveParams = RawMoveParamsRawMoveParams27,28
+  { rawVariableMap rawVariableMap28,29
+    rawEntryPoint rawEntryPoint29,30
+data CreateParams CreateParams40,41
+data CreateParams = CreateParamsCreateParams40,41
+  { datatypes datatypes41,42
+    participants participants42,43
+    arguments arguments43,44
+    contract contract44,45
+    timeoutLength timeoutLength45,46
+data MoveParams MoveParams52,53
+data MoveParams = MoveParamsMoveParams52,53
+  { variableMap variableMap53,54
+    entryPoint entryPoint54,55
+
+./lib/Glow/Gerbil/Fresh.hs,321
+module Glow.Gerbil.Fresh Glow.Gerbil.Fresh2,3
+type BSN BSN20,21
+type UnusedNats UnusedNats35,36
+type UnusedTable UnusedTable45,46
+bsToBsn bsToBsn56,57
+bsnToBs bsnToBs71,72
+useUnused useUnused89,90
+fresh fresh106,107
+markUsed markUsed118,119
+markAtomsUsed markAtomsUsed124,125
+freshId freshId136,137
+
+./lib/Glow/Gerbil/ImportSExpr.hs,814
+module Glow.Gerbil.ImportSExprGlow.Gerbil.ImportSExpr2,3
+data Output Output32,33
+data Output = OutputOutput32,33
+  { oFile oFile33,34
+    oSExpr oSExpr34,35
+type Parser Parser38,39
+parseOutputs parseOutputs40,41
+parseOutput parseOutput43,44
+parseLine parseLine49,50
+data FrontEndParams FrontEndParams53,54
+data FrontEndParams = FrontEndParamsFrontEndParams53,54
+    fepExePath fepExePath55,56
+    fepFile fepFile57,58
+data FrontEndData FrontEndData62,63
+data FrontEndData = FrontEndDataFrontEndData62,63
+    fedProject fedProject64,65
+    fedAnf fedAnf66,67
+    fedTypeTable fedTypeTable68,69
+    fedUnusedTable fedUnusedTable70,71
+data FrontEndErrorFrontEndError74,75
+  = SexpParseError SexpParseError75,76
+formatError formatError78,79
+frontEndData frontEndData82,83
+
+./lib/Glow/Gerbil/ParseAnf.hs,161
+module Glow.Gerbil.ParseAnf Glow.Gerbil.ParseAnf5,6
+parseModule parseModule14,15
+parseStatement parseStatement22,23
+parseSwitchCase parseSwitchCase89,90
+
+./lib/Glow/Runtime/Interaction.hs,760
+module Glow.Runtime.Interaction Glow.Runtime.Interaction0,1
+data Message Message7,8
+data Message p d = MessageMessage7,8
+    messageData messageData9,10
+    messageAssetTransfers messageAssetTransfers13,14
+data MessageWithParticipant MessageWithParticipant18,19
+data MessageWithParticipant p d = MessageWithParticipantMessageWithParticipant18,19
+  { mwpMessage mwpMessage19,20
+    mwpParticipant mwpParticipant20,21
+data Handle Handle27,28
+data Handle m p d = HandleHandle27,28
+    myParticipantId myParticipantId30,31
+    submit submit32,33
+    listenNext listenNext34,35
+data ConsensusServer ConsensusServer42,43
+data ConsensusServer m p d = ConsensusServerConsensusServer42,43
+    receive receive44,45
+    emit emit46,47
+
+./lib/Glow/Runtime/Lurk/Commands.hs,189
+module Glow.Runtime.Lurk.Commands Glow.Runtime.Lurk.Commands1,2
+parametersPrompt parametersPrompt31,32
+participantsPrompt participantsPrompt41,42
+deployContract deployContract47,48
+
+./lib/Glow/Runtime/Interaction/Sim.hs,1290
+module Glow.Runtime.Interaction.Sim Glow.Runtime.Interaction.Sim11,12
+import import18,19
+data LocalSimEnv LocalSimEnv59,60
+data LocalSimEnv = LocalSimEnvLocalSimEnv59,60
+     { _lseContract _lseContract60,61
+     , _lseIdentities _lseIdentities61,62
+     , _lseInteractionParameters _lseInteractionParameters62,63
+class (Monad m , MonadState s m) => ConsensusSim ConsensusSim66,67
+  env env68,69
+  localStateL localStateL70,71
+  consensusStateL' consensusStateL'73,74
+  onCall onCall75,76
+  afterCall afterCall78,79
+  promptInput promptInput82,83
+  getExecFlags getExecFlags84,85
+  runSim runSim121,122
+data ScriptedSimState ScriptedSimState134,135
+data ScriptedSimState = ScriptedSimStateScriptedSimState134,135
+     { _sssPendingInputs _sssPendingInputs135,136
+     , _sssLocalState _sssLocalState136,137
+     , _sssConsensusState _sssConsensusState137,138
+sssPendingInputsFor sssPendingInputsFor141,142
+type ScriptedSim ScriptedSim145,146
+instance ConsensusSim ConsensusSim ScriptedSim ScriptedSimState147,148
+  env env148,149
+  consensusStateL' consensusStateL'149,150
+  localStateL localStateL151,152
+  promptInput promptInput154,155
+  onCall onCall163,164
+  afterCall afterCall167,168
+runScriptedSim runScriptedSim172,173
+
+./lib/Glow/Runtime/Interaction/STM.hs,698
+module Glow.Runtime.Interaction.STMGlow.Runtime.Interaction.STM1,2
+type MsgChan MsgChan16,17
+data STMHandle STMHandle18,19
+data STMHandle m d = STMHandleSTMHandle18,19
+  { hSubmitChan hSubmitChan19,20
+    hListenChan hListenChan20,21
+    hParticipant hParticipant21,22
+newtype STMParticipantIdSTMParticipantId24,25
+data STMServer STMServer28,29
+data STMServer m d = STMServerSTMServer28,29
+  { sNextParticipant sNextParticipant29,30
+    sEmitChan sEmitChan30,31
+    sReceiveChan sReceiveChan31,32
+newSTMServer newSTMServer34,35
+newParticipantId newParticipantId46,47
+newSTMHandle newSTMHandle53,54
+toHandle toHandle64,65
+toConsensusServer toConsensusServer79,80
+
+./lib/Glow/Runtime/Interaction/Interact.hs,798
+module Glow.Runtime.Interaction.Interact Glow.Runtime.Interaction.Interact11,12
+import import18,19
+data LocalInteractEnv LocalInteractEnv60,61
+data LocalInteractEnv = LocalInteractEnvLocalInteractEnv60,61
+     { _lieContract _lieContract61,62
+     , _lieMyIdentity _lieMyIdentity62,63
+     , _lieMyRole _lieMyRole63,64
+     , _lieInteractionParameters _lieInteractionParameters64,65
+class (Monad m , MonadState s m) => ParticipantM ParticipantM69,70
+  env env72,73
+  getConsensusState getConsensusState74,75
+  localState localState76,77
+  promptInput promptInput78,79
+  onError onError80,81
+  onWait onWait82,83
+  afterCall afterCall85,86
+  sendCall sendCall88,89
+  execFlag execFlag90,91
+  runInteraction runInteraction106,107
+type CmdLineI CmdLineI126,127
+
+./lib/Glow/Runtime/Interaction/BuiltIns.hs,111
+module Glow.Runtime.Interaction.BuiltIns Glow.Runtime.Interaction.BuiltIns1,2
+evalBuiltIn evalBuiltIn11,12
+
+./lib/Glow/Runtime/Interaction/InteractWithServer.hs,773
+module Glow.Runtime.Interaction.InteractWithServer Glow.Runtime.Interaction.InteractWithServer11,12
+import import18,19
+data WithServerIEnv WithServerIEnv64,65
+data WithServerIEnv = WithServerIEnvWithServerIEnv64,65
+     { _wsieLocalInteractEnv _wsieLocalInteractEnv65,66
+     , _wsieUUID _wsieUUID66,67
+     , _wsieLastCall _wsieLastCall67,68
+type CmdLineWithServer CmdLineWithServer74,75
+instance ParticipantM ParticipantM CmdLineWithServer LocalState76,77
+  env env77,78
+  localState localState79,80
+  getConsensusState getConsensusState81,82
+  sendCall sendCall94,95
+  onWait onWait102,103
+  onError onError104,105
+  afterCall afterCall106,107
+  promptInput promptInput113,114
+runInteractionWithServer runInteractionWithServer127,128
+
+./lib/Glow/Runtime/Interaction/InterpretAnf.hs,925
+module Glow.Runtime.Interaction.InterpretAnf Glow.Runtime.Interaction.InterpretAnf10,11
+import import15,16
+data ExecFlag ExecFlag43,44
+     SendCall SendCall44,45
+   | PromptInput PromptInput45,46
+   | WaitWait46,47
+data LocalState LocalState50,51
+data LocalState = LocalStateLocalState50,51
+     { _lsInputs _lsInputs51,52
+initialLocalState initialLocalState56,57
+foldUntil foldUntil58,59
+foldUntilM foldUntilM65,66
+foldUntilM' foldUntilM'73,74
+data InterpretationState InterpretationState83,84
+data InterpretationState =  InterpretationStateInterpretationState83,84
+  { _isScope _isScope84,85
+  , _isInputs _isInputs85,86
+  , _isPublished _isPublished86,87
+  , _isSeed _isSeed87,88
+gLValueToValue gLValueToValue91,92
+valueToGLValue valueToGLValue101,102
+valueToMaybeConstant valueToMaybeConstant115,116
+gLTypeToType gLTypeToType119,120
+computeExecFlag computeExecFlag132,133
+
+./lib/Glow/Runtime/Interaction/Base.hs,93
+module Glow.Runtime.Interaction.Base Glow.Runtime.Interaction.Base7,8
+import import14,15
+
+./lib/Glow/Consensus/Local.hs,93
+module Glow.Consensus.Local Glow.Consensus.Local0,1
+runStateMachine runStateMachine14,15
+
+./lib/Glow/Consensus/Lurk.hs,3233
+module Glow.Consensus.Lurk Glow.Consensus.Lurk9,10
+type ParticipantId ParticipantId43,44
+data GLType GLType45,46
+data GLType = GLNatT GLNatT45,46
+data GLType = GLNatT | GLBoolT GLBoolT45,46
+data GLType = GLNatT | GLBoolT | GLStringT GLStringT45,46
+data GLType = GLNatT | GLBoolT | GLStringT | GLPFT GLPFT45,46
+data GLType = GLNatT | GLBoolT | GLStringT | GLPFT | DigestT DigestT45,46
+data GLType = GLNatT | GLBoolT | GLStringT | GLPFT | DigestT | GLUnitTGLUnitT45,46
+instance ToJSON ToJSON GLType48,49
+instance FromJSON FromJSON GLType49,50
+data GLValue GLValue51,52
+data GLValue = GLNat GLNat51,52
+data GLValue = GLNat Int | GLBool GLBool51,52
+data GLValue = GLNat Int | GLBool Bool | GLString GLString51,52
+data GLValue = GLNat Int | GLBool Bool | GLString T.Text | GLPF GLPF51,52
+data GLValue = GLNat Int | GLBool Bool | GLString T.Text | GLPF Int | DigestOf DigestOf51,52
+data GLValue = GLNat Int | GLBool Bool | GLString T.Text | GLPF Int | DigestOf GLValue | GLUnitGLUnit51,52
+instance ToJSON ToJSON GLValue54,55
+instance FromJSON FromJSON GLValue55,56
+prettyGLValue prettyGLValue58,59
+instance ToJSON ToJSON ByteString69,70
+  toJSON toJSON70,71
+instance FromJSON FromJSON ByteString72,73
+  parseJSON parseJSON73,74
+instance ToJSON ToJSON LedgerPubKey75,76
+instance FromJSON FromJSON LedgerPubKey76,77
+instance ToJSONKey ToJSONKey LedgerPubKey78,79
+  toJSONKey toJSONKey79,80
+instance FromJSONKey FromJSONKey LedgerPubKey82,83
+  fromJSONKey fromJSONKey83,84
+type LurkSource LurkSource85,86
+data GLContainer GLContainer87,88
+data GLContainer = GLContainerGLContainer87,88
+  { _participantsIds _participantsIds88,89
+  , _stateTransitionVerifier _stateTransitionVerifier89,90
+  , _signature _signature90,91
+data Action Action96,97
+    Withdraw Withdraw97,98
+  | Deposit Deposit98,99
+  | Publish Publish99,100
+instance ToJSON ToJSON Action102,103
+instance FromJSON FromJSON Action103,104
+data Call Call106,107
+data Call = CallCall106,107
+  { _desiredStateId _desiredStateId107,108
+  , _caller _caller108,109
+  , _action _action109,110
+instance ToJSON ToJSON Call114,115
+instance FromJSON FromJSON Call115,116
+render render125,126
+renderGLValue renderGLValue133,134
+translateGLValue translateGLValue147,148
+data LMState LMState169,170
+data LMState = LMStateLMState169,170
+  { _publicValues _publicValues170,171
+  , _stateId _stateId171,172
+instance ToJSON ToJSON LMState176,177
+instance FromJSON FromJSON LMState177,178
+initialLMState initialLMState180,181
+data LMEnv LMEnv187,188
+data LMEnv = LMEnvLMEnv187,188
+  { _identities _identities188,189
+  , _interactionParameters _interactionParameters189,190
+  , _stateTransitionVerifierSrc _stateTransitionVerifierSrc190,191
+instance ToJSON ToJSON LMEnv196,197
+instance FromJSON FromJSON LMEnv197,198
+data DeployedContract DeployedContract201,202
+data DeployedContract = DeployedContractDeployedContract201,202
+  { _initializationData _initializationData202,203
+  , _currentState _currentState203,204
+instance ToJSON ToJSON DeployedContract208,209
+instance FromJSON FromJSON DeployedContract209,210
+makeStateChange makeStateChange214,215
+
+./lib/Glow/Consensus/StateChannel.hs,1035
+module Glow.Consensus.StateChannel Glow.Consensus.StateChannel0,1
+data SCMessage SCMessage11,12
+  = SCMAgreement SCMAgreement12,13
+  | SCMDirect SCMDirect13,14
+data DirectMessage DirectMessage15,16
+data DirectMessage p d = DirectMessageDirectMessage15,16
+  { dmVersion dmVersion16,17
+    dmMessage dmMessage17,18
+data Agreement Agreement20,21
+data Agreement s p = AgreementAgreement20,21
+  { agreeProposal agreeProposal21,22
+    agreeProofs agreeProofs22,23
+data Proof Proof27,28
+data Proof s p = ProofProof27,28
+data Proposal Proposal29,30
+data Proposal s = ProposalProposal29,30
+  { proposeVersion proposeVersion30,31
+    proposeState proposeState31,32
+data State State34,35
+data State s = StateState34,35
+  { stateUnderlying stateUnderlying35,36
+    stateVersion stateVersion36,37
+    stateByAgreement stateByAgreement37,38
+runStateMachine runStateMachine40,41
+runStateMachine runStateMachine49,50
+validateAgreement validateAgreement61,62
+wrapStateMachine wrapStateMachine71,72
+
+./lib/Glow/Ast/LowLevel.hs,2225
+module Glow.Ast.LowLevel Glow.Ast.LowLevel0,1
+newtype Name Name8,9
+data Program Program11,12
+data Program a = ProgramProgram11,12
+  { pInfo pInfo12,13
+    pEntryPoint pEntryPoint14,15
+    pInitFn pInitFn17,18
+    pDefs pDefs18,19
+data Definition Definition22,23
+  = DefFunc DefFunc23,24
+  | DefVar DefVar24,25
+data VarDef VarDef27,28
+  = VarDef VarDef28,29
+data VarPropertyVarProperty31,32
+  = VpPersisentVpPersisent32,33
+  | VpMerkleizableVpMerkleizable33,34
+  | VpInteractionLocalVpInteractionLocal34,35
+  | VpParameterVpParameter35,36
+data FuncDef FuncDef38,39
+data FuncDef a = FuncDefFuncDef38,39
+  { fdParams fdParams39,40
+    fdResult fdResult40,41
+    fdBlocks fdBlocks41,42
+    fdStartBlock fdStartBlock42,43
+type Param Param46,47
+type ParamList ParamList48,49
+type Result Result50,51
+data Type Type52,53
+  = TyFunc TyFunc53,54
+  | TyInt TyInt54,55
+  | TyBool TyBool55,56
+  | TyArray TyArray56,57
+  | TyPtr TyPtr57,58
+  | TyTuple TyTuple58,59
+data Block Block61,62
+data Block a = BlockBlock61,62
+  { blkParams blkParams62,63
+    blkStmts blkStmts63,64
+    blkBranch blkBranch64,65
+data Stmt Stmt68,69
+  = StLet StLet69,70
+  | StIgnore StIgnore70,71
+data ValueStmt ValueStmt73,74
+  = ValStCall ValStCall74,75
+  | ValStEval ValStEval75,76
+data VoidStmt VoidStmt78,79
+  = VoidStCall VoidStCall79,80
+  | VoidStStore VoidStStore80,81
+data CallStmt CallStmt83,84
+  = CsCall CsCall84,85
+  | CsCallPtr CsCallPtr85,86
+data Branch Branch88,89
+  = BrReturn BrReturn89,90
+  | BrJump BrJump90,91
+  | BrSwitch BrSwitch91,92
+data SwitchCase SwitchCase94,95
+data SwitchCase a = SwitchCaseSwitchCase94,95
+  { scMatchValue scMatchValue95,96
+    scTarget scTarget96,97
+data JumpTarget JumpTarget100,101
+data JumpTarget a = JumpTargetJumpTarget100,101
+  { jtName jtName101,102
+    jtArgs jtArgs102,103
+data Expr Expr106,107
+  = ExVar ExVar107,108
+  | ExConst ExConst108,109
+  | ExFuncPtr ExFuncPtr109,110
+  | ExApplyOp ExApplyOp110,111
+data Op Op113,114
+  = OpAddOpAdd114,115
+  | OpSubOpSub115,116
+  | OpMulOpMul116,117
+  | OpOrOpOr117,118
+  | OpAndOpAnd118,119
+  | OpLoad OpLoad119,120
+
+./lib/Glow/Ast/Common.hs,534
+module Glow.Ast.Common Glow.Ast.Common3,4
+newtype Id Id9,10
+newtype Id = Id { idBS idBS9,10
+data IntType IntType12,13
+data IntType = IntTypeIntType12,13
+  { itSigned itSigned13,14
+    itNumBits itNumBits14,15
+data ConstantConstant18,19
+  = CBool CBool19,20
+  | CByteString CByteString20,21
+  | CInt CInt21,22
+  | CUnitCUnit22,23
+data TrivExprTrivExpr27,28
+  = TrexVar TrexVar28,29
+  | TrexConst TrexConst29,30
+cInteger cInteger32,33
+intType intType35,36
+bitLength bitLength41,42
+ceil8 ceil849,50
+
+./lib/Glow/Ast/Targets/Lurk.hs,1173
+module Glow.Ast.Targets.Lurk Glow.Ast.Targets.Lurk6,7
+data Expr Expr14,15
+  = ExNil ExNil15,16
+  | ExT ExT16,17
+  | ExIf ExIf17,18
+  | ExLambda ExLambda18,19
+  | ExLet ExLet19,20
+  | ExLetRec ExLetRec20,21
+  | ExBinary ExBinary21,22
+  | ExUnary ExUnary22,23
+  | ExBegin ExBegin23,24
+  | ExCurrentEnv ExCurrentEnv24,25
+  | ExFieldElem ExFieldElem25,26
+    ExEval ExEval27,28
+  | ExSymbol ExSymbol28,29
+  | ExApply ExApply29,30
+  | ExQuote ExQuote30,31
+  | ExString ExString31,32
+data BinOpBinOp35,36
+  = BOpConsBOpCons36,37
+  | BOpPlusBOpPlus37,38
+  | BOpMinusBOpMinus38,39
+  | BOpTimesBOpTimes39,40
+  | BOpDivBOpDiv40,41
+    BOpNumEqBOpNumEq42,43
+    BOpPtrEqBOpPtrEq44,45
+data UnaryOpUnaryOp48,49
+  = UOpCarUOpCar49,50
+  | UOpCdrUOpCdr50,51
+  | UOpEmitUOpEmit51,52
+data Let Let56,57
+data Let a = LetLet56,57
+  { letBindings letBindings57,58
+    letBody letBody58,59
+data Binding Binding63,64
+data Binding a = BindingBinding63,64
+  { bInfo bInfo64,65
+    bKey bKey65,66
+    bVal bVal66,67
+newtype Symbol Symbol71,72
+newtype Symbol = Symbol {symText symText71,72
+mkConsList mkConsList74,75
+
+./lib/Glow/Ast/LiftedFunctions.hs,1578
+module Glow.Ast.LiftedFunctions Glow.Ast.LiftedFunctions0,1
+data Module Module6,7
+data Module = Module Module6,7
+data TopStmtTopStmt9,10
+  = TsBodyStmt TsBodyStmt10,11
+    TsDefType TsDefType14,15
+  | TsDefData TsDefData15,16
+  | TsDefInteraction TsDefInteraction16,17
+    TsDefLambda TsDefLambda18,19
+data InteractionDef InteractionDef21,22
+data InteractionDef = InteractionDefInteractionDef21,22
+  { idParticipants idParticipants22,23
+    idAssets idAssets23,24
+    idParams idParams24,25
+    idBody idBody25,26
+data BodyStmtBodyStmt29,30
+  = BsPartStmt BsPartStmt30,31
+  | BsWithdraw BsWithdraw31,32
+  | BsDeposit BsDeposit32,33
+  | BsPublish BsPublish33,34
+  | BsSwitch BsSwitch34,35
+data PartStmtPartStmt37,38
+  = PsLabel PsLabel38,39
+  | PsDebugLabel PsDebugLabel39,40
+  | PsDef PsDef40,41
+  | PsIgnore PsIgnore41,42
+  | PsReturn PsReturn42,43
+  | PsRequire PsRequire43,44
+  | PsAssert PsAssert44,45
+  | PsSwitch PsSwitch45,46
+data Switch Switch48,49
+data Switch stmt = SwitchSwitch48,49
+  { swArg swArg49,50
+    swBranches swBranches50,51
+data ExprExpr54,55
+  = ExTriv ExTriv55,56
+  | ExDot ExDot56,57
+  | ExList ExList57,58
+  | ExTuple ExTuple58,59
+  | ExRecord ExRecord59,60
+    ExEq ExEq61,62
+  | ExInput ExInput62,63
+    ExDigest ExDigest64,65
+  | ExSign ExSign65,66
+  | ExCapture ExCapture66,67
+  | ExApp ExApp67,68
+data Lambda Lambda70,71
+data Lambda stmt = LambdaLambda70,71
+  { lamCaptures lamCaptures71,72
+    lamParams lamParams73,74
+    lamBody lamBody74,75
+
+./lib/Glow/Ast/HighLevel.hs,1289
+module Glow.Ast.HighLevel Glow.Ast.HighLevel17,18
+data Program Program23,24
+data Program a = ProgramProgram23,24
+  { progFuncs progFuncs24,25
+    progMain progMain26,27
+data Type Type29,30
+  = TyTuple TyTuple30,31
+  | TyFunc TyFunc31,32
+    TyFuncPtr TyFuncPtr33,34
+data EffTypeEffType41,42
+    EtNoneEtNone43,44
+    EtAbortEtAbort45,46
+    EtStateUpdatesEtStateUpdates47,48
+    EtQueryEtQuery49,50
+    EtSetParticipantEtSetParticipant51,52
+data Expr Expr54,55
+  = ExLet ExLet55,56
+  | ExApply ExApply56,57
+    ExLift ExLift58,59
+  | ExEffOp ExEffOp59,60
+  | ExConst ExConst60,61
+  | ExBuiltin ExBuiltin61,62
+    ExCapture ExCapture64,65
+data Lambda Lambda67,68
+data Lambda a = LambdaLambda67,68
+  { lamCaptures lamCaptures68,69
+    lamParams lamParams69,70
+    lamReturnType lamReturnType70,71
+    lamEffectType lamEffectType71,72
+    lamBody lamBody72,73
+data BuiltinBuiltin75,76
+  = BAddBAdd76,77
+  | BSubBSub77,78
+  | BMulBMul78,79
+    BOrBOr80,81
+  | BAndBAnd81,82
+effOpType effOpType86,87
+data EffOp EffOp94,95
+  = EffGetParticipant EffGetParticipant95,96
+  | EffSetParticipant EffSetParticipant96,97
+  | EffDeposit EffDeposit97,98
+  | EffWithdraw EffWithdraw98,99
+  | EffRequire EffRequire99,100
+
+./lib/Glow/Ast/Surface.hs,965
+module Glow.Ast.Surface Glow.Ast.Surface3,4
+type Str Str9,10
+type Program Program11,12
+data StmtStmt14,15
+  = StExpr StExpr15,16
+  | StLet StLet16,17
+data ExprExpr20,21
+  = ExUnitExUnit21,22
+  | ExIdent ExIdent22,23
+  | ExLiteral ExLiteral23,24
+    ExBinary ExBinary25,26
+  | ExLambda ExLambda26,27
+  | ExRecord ExRecord27,28
+  | ExBody ExBody28,29
+data BinOpBinOp36,37
+  = BinOpAddBinOpAdd37,38
+  | BinOpSubBinOpSub38,39
+  | BinOpMulBinOpMul39,40
+  | BinOpDivBinOpDiv40,41
+  | BinOpModBinOpMod41,42
+data Function Function44,45
+data Function = FunctionFunction44,45
+  { fParams fParams45,46
+    fBody fBody46,47
+data Param Param50,51
+data Param = ParamParam50,51
+  { pName pName51,52
+    pType pType52,53
+data TypeType56,57
+  = TyIdent TyIdent57,58
+data LiteralLiteral60,61
+  = LitBool LitBool61,62
+  | LitNat LitNat62,63
+  | LitStr LitStr63,64
+  | LitFn LitFn64,65
+newtype Symbol Symbol67,68
+
+./lib/Glow/Ast/BlockParamPassing.hs,1995
+module Glow.Ast.BlockParamPassing Glow.Ast.BlockParamPassing9,10
+data Module Module28,29
+data Module = ModuleModule28,29
+  { pTypes pTypes29,30
+    pInteractions pInteractions30,31
+    pFuncs pFuncs31,32
+    pInitBody pInitBody32,33
+data Body Body40,41
+data Body = BodyBody40,41
+  { bdyBlocks bdyBlocks41,42
+    bdyStartBlock bdyStartBlock42,43
+data Block Block63,64
+data Block = BlockBlock63,64
+  { blkPartInfo blkPartInfo64,65
+    blkParams blkParams65,66
+    blkStmts blkStmts66,67
+    blkBranch blkBranch67,68
+data BlockParticipantInfoBlockParticipantInfo71,72
+  = BpiPublic BpiPublic72,73
+  | BpiPrivate BpiPrivate73,74
+data EventualDestinationEventualDestination76,77
+  = EpdReturn EpdReturn77,78
+  | EpdJump EpdJump78,79
+data BranchBranch81,82
+  = BrReturn BrReturn82,83
+  | BrJump BrJump83,84
+  | BrSwitch BrSwitch84,85
+data JumpTarget JumpTarget87,88
+data JumpTarget = JumpTargetJumpTarget87,88
+  { jtName jtName88,89
+    jtArgs jtArgs89,90
+data SwitchCase SwitchCase93,94
+data SwitchCase = SwitchCaseSwitchCase93,94
+  { scMatchValue scMatchValue94,95
+    scTarget scTarget95,96
+data TypeDefTypeDef99,100
+  = TdDefType TdDefType100,101
+  | TdDefData TdDefData101,102
+data InteractionDef InteractionDef104,105
+data InteractionDef = InteractionDefInteractionDef104,105
+  { idParticipants idParticipants105,106
+    idAssets idAssets106,107
+    idParams idParams107,108
+    idBody idBody108,109
+data FuncDef FuncDef112,113
+data FuncDef = FuncDefFuncDef112,113
+  { fdPart fdPart113,114
+    fdCaptures fdCaptures114,115
+    fdParams fdParams115,116
+    fdBody fdBody116,117
+data BodyStmtBodyStmt120,121
+  = BsPartStmt BsPartStmt121,122
+  | BsWithdraw BsWithdraw122,123
+  | BsDeposit BsDeposit123,124
+  | BsPublish BsPublish124,125
+data PartStmtPartStmt127,128
+  = PsDef PsDef128,129
+  | PsIgnore PsIgnore129,130
+  | PsRequire PsRequire130,131
+  | PsAssert PsAssert131,132
+
+./lib/Glow/Precompiled/LMonadToLurk.hs,341
+module Glow.Precompiled.LMonadToLurk Glow.Precompiled.LMonadToLurk3,4
+symEx symEx22,23
+appS appS28,29
+pidToLExpr pidToLExpr31,32
+fixGlowBuiltIns fixGlowBuiltIns39,40
+tExprToLurk tExprToLurk45,46
+constantToGLValue constantToGLValue50,51
+exprToLurk exprToLurk59,60
+lMonadToLurk lMonadToLurk67,68
+mkVerifier mkVerifier85,86
+
+./lib/Glow/Precompiled/LMonad.hs,498
+module Glow.Precompiled.LMonad Glow.Precompiled.LMonad1,2
+data Action Action15,16
+data Action = WithdrawA WithdrawA15,16
+data Action = WithdrawA Expr | DepositA DepositA15,16
+type PID PID19,20
+type EID EID20,21
+type Expr Expr22,23
+data LMonad LMonad26,27
+    Action Action27,28
+  | RequireLM RequireLM28,29
+  | ExpectPub ExpectPub29,30
+  | Bind Bind30,31
+  | Next Next31,32
+  | Pure Pure32,33
+  | Branch Branch33,34
+headAsset headAsset36,37
+toLMonad toLMonad44,45
+
+./lib/Glow/Precompiled/Mark.hs,135
+module Glow.Precompiled.Mark Glow.Precompiled.Mark3,4
+mbMarkANF mbMarkANF11,12
+mapAccumLM mapAccumLM34,35
+markANF markANF41,42
+
+./lib/Glow/Precompiled/Base.hs,444
+module Glow.Precompiled.Base Glow.Precompiled.Base4,5
+data PrecompiledContract PrecompiledContract21,22
+data PrecompiledContract = PrecompiledContractPrecompiledContract21,22
+    { _pcParticipantNames _pcParticipantNames22,23
+    , _pcParamsIds _pcParamsIds23,24
+    , _pcAnf _pcAnf24,25
+    , _pcVerifier _pcVerifier25,26
+    , _pcTypeTable _pcTypeTable26,27
+paramsWithTypes paramsWithTypes33,34
+precompile precompile39,40
+
+./lib/Glow/StateChannel.hs,854
+module Glow.StateChannel Glow.StateChannel15,16
+data Proposer Proposer25,26
+data Proposer (m :: Type -> Type) s i = ProposerProposer25,26
+propose propose27,28
+data WrappedHandle WrappedHandle32,33
+data WrappedHandle m s p d = WrappedHandleWrappedHandle32,33
+  { whHandle whHandle33,34
+    whProposer whProposer34,35
+    whTransition whTransition35,36
+    whState whState36,37
+    whIncomingProposals whIncomingProposals37,38
+data ProposalMsg ProposalMsg40,41
+data ProposalMsg m s p d = ProposalMsgProposalMsg40,41
+  { pmOldVersion pmOldVersion41,42
+    pmMessage pmMessage42,43
+    pmReply pmReply43,44
+data WrappedHandleState WrappedHandleState46,47
+data WrappedHandleState s = WrappedHandleStateWrappedHandleState46,47
+  { whsState whsState47,48
+wrapHandle wrapHandle50,51
+acceptProposal acceptProposal112,113
+
+./lib/Glow/Mock/Lurk/Server.hs,155
+module Glow.Mock.Lurk.Server Glow.Mock.Lurk.Server12,13
+instance Parsable Parsable UUID36,37
+  parseParam parseParam37,38
+runServer runServer39,40
+
+./lib/Glow/Mock/Lurk/Consensus.hs,1660
+module Glow.Mock.Lurk.Consensus Glow.Mock.Lurk.Consensus12,13
+import import17,18
+data AccountState AccountState49,50
+data AccountState = AccountStateAccountState49,50
+  { _balance _balance50,51
+instance ToJSON ToJSON AccountState55,56
+instance FromJSON FromJSON AccountState56,57
+data ConsensusState ConsensusState60,61
+data ConsensusState = ConsensusStateConsensusState60,61
+  { _accounts _accounts61,62
+  , _contracts _contracts62,63
+instance ToJSON ToJSON ConsensusState67,68
+instance FromJSON FromJSON ConsensusState68,69
+initialConsensusState initialConsensusState72,73
+renderCall renderCall75,76
+crudeQuote crudeQuote94,95
+mkLurkInput mkLurkInput97,98
+verifyCall verifyCall108,109
+executeCall executeCall127,128
+type CMS CMS140,141
+type LMS LMS142,143
+runAtContract runAtContract144,145
+deployContract deployContract156,157
+getContractState getContractState166,167
+interactWithContract interactWithContract171,172
+overrideConsensusState overrideConsensusState180,181
+lurkExecutable lurkExecutable183,184
+tempLurkSourceFile tempLurkSourceFile186,187
+callLurk callLurk193,194
+wrapIntoJson wrapIntoJson211,212
+glowLurkWrapper glowLurkWrapper217,218
+glowOnLurkLib glowOnLurkLib220,221
+coinFlip0 coinFlip0335,336
+coinFlip coinFlip339,340
+coinFlip' coinFlip'342,343
+jmConsensusState jmConsensusState345,346
+coinFlipConsensusState coinFlipConsensusState353,354
+coinFlipConsensusState' coinFlipConsensusState'363,364
+exampleCall exampleCall376,377
+exampleCall' exampleCall'380,381
+exampleCall'' exampleCall''383,384
+singleTest singleTest387,388
+singleTest' singleTest'391,392
+
+./lib/Glow/Foreign/Lurk/Base.hs,58
+module Glow.Foreign.Lurk.Base Glow.Foreign.Lurk.Base0,1
+
+./lib/Glow/Main.hs,70
+module Glow.Main Glow.Main0,1
+main main24,25
+mainCF mainCF48,49
+
+./lib/Glow/Translate/FunctionLift.hs,780
+module Glow.Translate.FunctionLift Glow.Translate.FunctionLift3,4
+type LiftState LiftState33,34
+rwSA rwSA35,36
+srWS srWS39,40
+interceptAW interceptAW47,48
+functionLift functionLift52,53
+liftTopStmts liftTopStmts58,59
+liftTopStmt liftTopStmt61,62
+liftBodyStmts liftBodyStmts108,109
+splitBody splitBody113,114
+splitBody1 splitBody1116,117
+liftPartStmts liftPartStmts122,123
+liftSwitchCases liftSwitchCases127,128
+liftSwitchCase liftSwitchCase131,132
+translateExpr translateExpr138,139
+localDefs localDefs152,153
+localDefs1 localDefs1155,156
+usedVars usedVars165,166
+usedVars1 usedVars1168,169
+usedVarsExpr usedVarsExpr184,185
+usedVarsGVR usedVarsGVR194,195
+usedVarsAM usedVarsAM199,200
+unionMap unionMap202,203
+patVars patVars205,206
+
+./lib/Glow/Translate/GerbilTypeToLastLeg.hs,160
+module Glow.Translate.GerbilTypeToLastLeg Glow.Translate.GerbilTypeToLastLeg3,4
+translateType translateType10,11
+translateTypeName translateTypeName26,27
+
+./lib/Glow/Translate/LurkToSExpr.hs,292
+module Glow.Translate.LurkToSExpr Glow.Translate.LurkToSExpr3,4
+translateExpr translateExpr10,11
+translateSymbol translateSymbol44,45
+translateBinOp translateBinOp48,49
+translateUnaryOp translateUnaryOp58,59
+translateLet translateLet64,65
+translateBinding translateBinding70,71
+
+./lib/Glow/MainLurk.hs,57
+module Glow.MainLurk Glow.MainLurk0,1
+main main24,25
+
+./lib/Glow/Prelude.hs,37
+module Glow.PreludeGlow.Prelude7,8

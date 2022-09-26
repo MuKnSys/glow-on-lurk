@@ -31,6 +31,8 @@ main = do
        pc <- precomp file
        params <- map snd <$> parametersPrompt (paramsWithTypes pc)
        ptcps <- participantsPrompt (Id <$> pc ^. pcParticipantNames)
+       putStrLn $ show ptcps
+       putStrLn $ show params
        r <- deployContract pc params ptcps
        case r of
          Left err -> error err
@@ -53,13 +55,21 @@ main = do
     ("interact-cli" : file : cid : pubK : role : paramsS : i : _) -> do 
         pc <- precomp file
         let params = read paramsS
-        putStrLn $ show params
+--        putStrLn $ show params
         void $ OS.runInteractionWithServer
                 (LocalInteractEnv
                  pc
                  (LedgerPubKey (pack pubK))
                  (pack role)
                  params) (fromJust $ UUID.fromString cid) i
+    ("deploy-cli" : file : paramsS : ptcpsS : _ ) -> do
+        pc <- precomp file
+        let params = read paramsS
+        let ptcps = read ptcpsS
+        r <- deployContract pc params ptcps
+        case r of
+          Left err -> error err
+          Right cid -> putStrLn (UUID.toString cid)
 
     _ -> putStrLn "unrecognized args"
 

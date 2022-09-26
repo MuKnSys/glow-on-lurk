@@ -125,6 +125,7 @@ library
     , Glow.Runtime.Interaction.InteractWithServerOneStep
     , Glow.Runtime.Interaction.BuiltIns
     , Glow.Runtime.Interaction.Interact
+    , Glow.Runtime.Interaction.Sim
    
 executable glow
   import: shared-opts
@@ -151,7 +152,7 @@ executable run-glow
                  http-client >= 0.7.11,
                  lens >= 5.1
   hs-source-dirs: exe
-  main-is: RunGlow.hs  
+  main-is: RunGlow.hs
 
   
 -- test-suite tests

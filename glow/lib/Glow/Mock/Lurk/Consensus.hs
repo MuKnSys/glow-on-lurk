@@ -131,8 +131,8 @@ executeCall c = do
   s <- gets ((^. currentState) . (M.! cUuid  ) . (^. contracts))
   let s' = (stateId .~ c ^. desiredStateId) s
   s'' <- case c ^. action of
-       Withdraw a -> modify (accounts %~ (M.adjust (balance %~ (\b -> b - a))  (c ^. caller))) >> return s' 
-       Deposit a -> modify (accounts %~ (M.adjust (balance %~ (\b -> b + a))  (c ^. caller))) >> return s'
+       Withdraw a -> modify (accounts %~ (M.adjust (balance %~ (\b -> b + a))  (c ^. caller))) >> return s' 
+       Deposit a -> modify (accounts %~ (M.adjust (balance %~ (\b -> b - a))  (c ^. caller))) >> return s'
        Publish v -> return $ (publicValues %~ (++[v])) s' 
   modify (contracts %~ (M.adjust (currentState .~ s'')  cUuid))
   return ()
