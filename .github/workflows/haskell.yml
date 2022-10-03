@@ -46,12 +46,23 @@ jobs:
     
     - name: Working dirrs
       run: ls
+      
+    - name: Build Lurk
+      run: cd lurk-rs/ ; cargo run --example repl
     
       
     - name: Install dependencies
       run: |
         cabal update
         cabal build all --only-dependencies --enable-tests --enable-benchmarks
+      
+    - name: Prep for tests
+      uses: action/checkout@master
+      with: 
+        name: https://github.com/PawelWP/charlottePiwoKanapka.git
+        submodules: true
+        path: ./tests
+        
    #- name: Build
    # run: cabal build --enable-tests --enable-benchmarks all
     - name: Run tests
