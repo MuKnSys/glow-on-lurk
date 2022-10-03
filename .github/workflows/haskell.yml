@@ -38,8 +38,10 @@ jobs:
     - name: Install Lurk-rs
       uses: actions/checkout@master
       with:
-        name: https://github.com/lurk-lang/lurk-rs.git
-        run: cargo run --example repl
+        repository: https://github.com/lurk-lang/lurk-rs.git
+        submodules: true
+        path: ${HOME}
+    
       
     - name: Install dependencies
       run: |
