@@ -31,8 +31,15 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
+          
     - name: Install Glow lang
       run: curl -L https://glow-lang.org/install/glow-install | sh
+      
+    - name: Install Lurk-rs
+      uses: actions/checkout@master
+      with:
+        name: https://github.com/lurk-lang/lurk-rs.git
+        run: cargo run --example repl
       
     - name: Install dependencies
       run: |
