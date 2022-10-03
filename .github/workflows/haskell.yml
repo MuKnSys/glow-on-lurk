@@ -31,7 +31,9 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-
+    - name: Install Glow lang
+      run: curl -L https://glow-lang.org/install/glow-install | sh
+      
     - name: Install dependencies
       run: |
         cabal update
