@@ -33,14 +33,16 @@ jobs:
           ${{ runner.os }}-
           
     - name: Install Glow lang
-      run: curl -L https://glow-lang.org/install/glow-install | sh
+      run: mkdir glow ; curl -L https://glow-lang.org/install/glow-install | sh
+      
+      
       
     - name: Install Lurk-rs
       uses: actions/checkout@master
       with:
         name: https://github.com/lurk-lang/lurk-rs.git
         submodules: true
-        path: ${HOME}
+        path: /home/lurk-rs
     
     - name: Working dirrs
       run: ls
