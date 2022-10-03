@@ -33,7 +33,7 @@ jobs:
           ${{ runner.os }}-
           
     - name: Install Glow lang
-      run: mkdir glow ; curl -L https://glow-lang.org/install/glow-install | sh
+      run: curl -L https://glow-lang.org/install/glow-install | sh
       
       
       
