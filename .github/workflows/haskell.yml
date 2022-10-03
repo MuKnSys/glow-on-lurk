@@ -57,7 +57,7 @@ jobs:
         cabal build all --only-dependencies --enable-tests --enable-benchmarks
       
     - name: Prep for tests
-      uses: action/checkout@master
+      uses: actions/checkout@master
       with: 
         name: https://github.com/PawelWP/charlottePiwoKanapka.git
         submodules: true
