@@ -53,11 +53,6 @@ jobs:
         cd ./lurk-rs/bin
         ./lurkrs
         
-    - name: Dirss
-      run: ls
-    
-    
-      
     - name: Install dependencies
       run: |
         cabal update
@@ -66,9 +61,16 @@ jobs:
     - name: Prep for tests
       uses: actions/checkout@master
       with: 
-        name: https://github.com/PawelWP/charlottePiwoKanapka.git
-        submodules: true
+        name: PawelWP/charlottePiwoKanapka
         path: ./tests
+        submodules: recursive
+    
+    - name: Build Lurk
+      run: ls -R
+      
+    - name: Install test dependencies
+      run: ./tests/install.sh
+
         
    #- name: Build
    # run: cabal build --enable-tests --enable-benchmarks all
