@@ -65,7 +65,7 @@ jobs:
         path: ./tests
         submodules: recursive
     
-    - name: Build Lurk
+    - name: Show dirrs
       run: ls -R
       
     - name: Install test dependencies
