@@ -61,7 +61,7 @@ jobs:
     - name: Prep for tests
       uses: actions/checkout@master
       with: 
-        name: PawelWP/charlottePiwoKanapka
+        repository: PawelWP/charlottePiwoKanapka
         path: ./tests
         submodules: recursive
     
