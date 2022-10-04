@@ -71,6 +71,11 @@ jobs:
       
     - name: Install test dependencies
       run: ./tests/e2eGlow/install.sh
+      
+    - name: Run Mocha Tests
+      run: |
+        cd ./tests/e2eGlow
+        mocha tests/ --timeout 5000
 
         
    #- name: Build
