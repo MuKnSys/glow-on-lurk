@@ -70,7 +70,7 @@ jobs:
       run: ls -R
       
     - name: Install test dependencies
-      run: ./tests/install.sh
+      run: ./tests/e2eGlow/install.sh
 
         
    #- name: Build
