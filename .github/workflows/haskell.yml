@@ -49,8 +49,7 @@ jobs:
       
     - name: Build Lurk
       run: |
-        cd lurk-rs
-        pwd
+        /home/runner/work/charlottePiwoKanapka2/charlottePiwoKanapka2/lurk-rs/bin/lurk-rs
         
     - name: Dirss
       run: ls
