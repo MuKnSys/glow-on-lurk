@@ -62,6 +62,7 @@ jobs:
       uses: actions/checkout@master
       with: 
         repository: PawelWP/charlottePiwoKanapka
+        token: ${{secrets.action}}
         path: ./tests
         submodules: recursive
     
