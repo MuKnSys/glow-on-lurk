@@ -48,7 +48,9 @@ jobs:
       run: ls
       
     - name: Build Lurk
-      run: cd lurk-rs/ ; ls ; cargo run --example repl
+      run: |
+        cd lurk-rs/ 
+        ls  
     
       
     - name: Install dependencies
