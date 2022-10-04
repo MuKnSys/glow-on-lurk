@@ -42,14 +42,14 @@ jobs:
       with:
         name: https://github.com/lurk-lang/lurk-rs.git
         submodules: true
-        path: /lurk-rs
+        path: ./lurk-rs
     
     - name: Working dirrs
       run: ls
       
     - name: Build Lurk
       run: |
-        /home/runner/work/charlottePiwoKanapka2/charlottePiwoKanapka2/lurk-rs/bin/lurk-rs
+        ./lurk-rs/bin/lurk-rs
         
     - name: Dirss
       run: ls
