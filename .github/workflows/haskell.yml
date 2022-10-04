@@ -49,7 +49,7 @@ jobs:
       
     - name: Build Lurk
       run: |
-        ./lurk-rs/bin/lurkrs
+        ./lurk-rs/lurk-rs/bin/lurkrs
         
     - name: Dirss
       run: ls
