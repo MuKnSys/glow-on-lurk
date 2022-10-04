@@ -50,6 +50,7 @@ jobs:
     - name: Build Lurk
       run: |
         cd lurk-rs
+        pwd
         
     - name: Dirss
       run: ls
