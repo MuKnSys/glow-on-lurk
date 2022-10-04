@@ -50,7 +50,10 @@ jobs:
     - name: Build Lurk
       run: |
         cd lurk-rs/ 
-        ls  
+        
+    - name: Dirss
+      run: ls
+    
     
       
     - name: Install dependencies
