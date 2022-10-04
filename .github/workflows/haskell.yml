@@ -49,7 +49,7 @@ jobs:
    # run: chmod +x ./lurk-rs/bin-lurkrs
       
     - name: Build Lurk
-      run: ls -R
+      run: ./lurk-rs/bin/lurkrs
         
     - name: Dirss
       run: ls
