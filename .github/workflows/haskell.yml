@@ -44,12 +44,12 @@ jobs:
         submodules: recursive
         path: ./lurk-rs
     
-    - name: Working dirrs
-      run: ls
+   # - name: Permission for lurk-rs
+   # run: chmod +x ./lurk-rs/bin-lurkrs
       
     - name: Build Lurk
       run: |
-        ./lurk-rs/bin/lurk-rs
+        ./lurk-rs/bin/lurkrs
         
     - name: Dirss
       run: ls
