@@ -40,9 +40,10 @@ jobs:
     - name: Clone Lurk-rs
       uses: actions/checkout@master
       with:
-        name: https://github.com/lurk-lang/lurk-rs.git
-        submodules: recursive
+        repository: lurk-lang/lurk-rs
         path: ./lurk-rs
+        submodules: recursive
+        
     
    # - name: Permission for lurk-rs
    # run: chmod +x ./lurk-rs/bin-lurkrs
