@@ -112,7 +112,7 @@ valueToGLValue ty = \case
        _ -> error ("not implemented: " ++ show ty)
   Integer i -> GCL.GLNat $ fromIntegral i
   Boolean b -> GCL.GLBool b
-  Float f -> GCL.GLFloat $ fromIntegral f 
+  Float f -> GCL.GLFloat f 
   Unit -> GCL.GLUnit
 
 valueToMaybeConstant :: GlowValue -> Maybe Constant
