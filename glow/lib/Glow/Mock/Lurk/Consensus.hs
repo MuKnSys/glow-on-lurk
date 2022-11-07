@@ -187,6 +187,9 @@ lurkExecutable = "/home/pawel/Desktop/lurk-rs/target/release/fcomm"
 tempLurkSourceFile :: FilePath
 tempLurkSourceFile = "/tmp/tempLurkSourceFile.json"
 
+tempClaimFile :: FilePath
+tempClaimFile = "/tmp/state-claim.json"
+
 
 
 
@@ -205,9 +208,15 @@ callLurk code call = do
      Left err -> putStrLn (show r') >> putStrLn err >> error "fatal error while calling lurk"
      Right (r'') -> return r''
   
+
   
 
-
+makeVerifier :: IO()
+makeVerifier = do
+  verifier <- P.readProcess lurkExecutable ["eval","--expression", tempLurkSourceFile ,"--claim", "/tmp/state-claim1.json" ] ""
+  putStrLn $ show verifier 
+  proof <- P.readProcess lurkExecutable [ "prove", "--claim", tempClaimFile, "--proof", "/tmp/state-proof.json"] ""
+  putStrLn $ show proof
 
 wrapIntoJson :: LurkSource -> T.Text
 wrapIntoJson x = T.replace "<SRC>" (T.filter (\x' -> not $ L.elem x' ("\n\t" :: String))  x)

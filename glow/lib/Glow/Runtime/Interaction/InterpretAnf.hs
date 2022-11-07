@@ -92,6 +92,7 @@ makeLenses ''InterpretationState
 gLValueToValue :: GCL.GLValue -> GlowValue 
 gLValueToValue = \case
   GCL.GLNat k -> Integer (fromIntegral k)
+  GCL.GLFloat k -> Float k
   GCL.GLBool k -> Boolean k
   GCL.GLString s -> ByteString $ pack (unpack s)
   GCL.GLPF k -> error "not implemented"
@@ -111,6 +112,7 @@ valueToGLValue ty = \case
        _ -> error ("not implemented: " ++ show ty)
   Integer i -> GCL.GLNat $ fromIntegral i
   Boolean b -> GCL.GLBool b
+  Float f -> GCL.GLFloat $ fromIntegral f 
   Unit -> GCL.GLUnit
 
 valueToMaybeConstant :: GlowValue -> Maybe Constant
@@ -123,6 +125,7 @@ gLTypeToType = \case
      case x of
        "Nat" -> GCL.GLNatT
        "Int" -> GCL.GLNatT
+       "Float" -> GCL.GLFloatT
        "Digest" -> GCL.DigestT
        "Bool" -> GCL.GLBoolT
        "String" -> GCL.GLStringT

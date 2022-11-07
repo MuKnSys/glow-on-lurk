@@ -31,7 +31,7 @@ import qualified GHC.Generics as G
 import Data.Aeson
 import Data.Aeson.Types (toJSONKeyText)
 import Text.SExpression as S
-import Numeric (showIntAtBase)
+import Numeric (showIntAtBase, showFloat )
 import Data.Char (intToDigit)
 
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey),lpkBS)
@@ -43,13 +43,13 @@ import Data.ByteString.Char8 (unpack,pack)
 
 type ParticipantId = Int
 
-data GLType = GLNatT | GLBoolT | GLStringT | GLPFT | DigestT | GLUnitT 
+data GLType = GLNatT | GLBoolT | GLStringT | GLPFT | DigestT | GLFloatT | GLUnitT
   deriving (Show , Read , Eq , G.Generic, Ord)
 
 instance ToJSON GLType where
 instance FromJSON GLType where
 
-data GLValue = GLNat Int | GLBool Bool | GLString T.Text | GLPF Int | DigestOf GLValue | GLUnit 
+data GLValue = GLNat Int | GLBool Bool | GLString T.Text | GLPF Int | DigestOf GLValue | GLUnit | GLFloat Float
   deriving (Show , Read , Eq , G.Generic, Ord)
 
 instance ToJSON GLValue where
@@ -60,6 +60,7 @@ prettyGLValue :: GLValue -> String
 prettyGLValue = \case
   GLNat k -> show k
   GLBool k -> show k
+  GLFloat k -> show k
   GLString s -> show s
   GLPF k -> show k L.++ "(PF)"
   DigestOf x -> "dig(" L.++ (prettyGLValue x) L.++  ")" 
@@ -139,6 +140,11 @@ renderGLValue = \case
                               _ -> S.Atom "NIL")
                               
                         (reverse $ showIntAtBase 2 intToDigit k "")
+  GLFloat k -> S.List $ map (\case
+                                 '1' -> S.Atom "T"
+                                 _ -> S.Atom "NIL")
+                
+                        (reverse $ showFloat k ""  )
   GLBool k -> if k then (S.Atom "T") else (S.Atom "NIL")
   GLString k -> Atom (show k)
   GLPF k -> Atom (show k)
@@ -153,6 +159,11 @@ translateGLValue = \case
                               _ -> S.Atom "NIL")
                               
                         (reverse $ showIntAtBase 2 intToDigit k "")
+
+  GLFloat k -> LT.ExQuote () $ S.List $ map (\case
+                                '1' -> S.Atom "T"
+                                _ -> S.Atom "NIL")
+                        (reverse $ showFloat k "")
         -- LT.mkConsList $ map (\case
         --                       '1' -> LT.ExT ()
         --                       _ -> LT.ExNil ())

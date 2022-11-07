@@ -14,6 +14,7 @@ evalBuiltIn = \case
   -- "randomUInt256" -> \(Integer x : _) -> Right (Integer x )
   "+" -> \[Integer x , Integer y] -> Right (Integer (x + y))
   "*" -> \[Integer x , Integer y] -> Right (Integer (x * y))
+  "/" -> \[Float x , Float  y] -> Right (Float (x / y))
   "bitwise-xor" -> \[Integer x , Integer y] -> Right (Integer (xor x y))
   "bitwise-and" -> \[Integer x , Integer y] -> Right (Integer (x .&. y))
   i -> \_ -> Left ((show i) ++ " - builtIn not implemented!") 

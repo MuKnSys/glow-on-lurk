@@ -45,7 +45,7 @@ participantsPrompt = traverse $ \(roleName) -> do
   (roleName,)  <$> LedgerPubKey . B.pack <$> getLine
                    
 
-deployContract :: PrecompiledContract -> [GLValue] -> [(Id , LedgerPubKey)] -> IO (Either String UUID)
+deployContract :: PrecompiledContract  -> [GLValue] -> [(Id , LedgerPubKey)] -> IO (Either String UUID)
 deployContract pc params ptps' = do
   let ptps = M.fromList ptps'
       lme =

@@ -33,6 +33,7 @@ main = do
        ptcps <- participantsPrompt (Id <$> pc ^. pcParticipantNames)
        putStrLn $ show ptcps
        putStrLn $ show params
+       
        r <- deployContract pc params ptcps
        case r of
          Left err -> error err

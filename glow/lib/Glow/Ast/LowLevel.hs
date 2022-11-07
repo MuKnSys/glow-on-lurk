@@ -115,6 +115,7 @@ data Op a
   = OpAdd
   | OpSub
   | OpMul
+  | OpDiv
   | OpOr
   | OpAnd
   | OpLoad (Type a)
