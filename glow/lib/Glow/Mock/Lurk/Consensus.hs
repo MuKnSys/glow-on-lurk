@@ -270,7 +270,6 @@ glowOnLurkLib = [r|(letrec
 		     )))
      	    ))
      (+NAT (lambda (a b) (+NNATh a b ())))
- 
 
      (*NAT (lambda (a b) (if a (+NAT (if (car a) b ()) (cons () (*NAT (cdr a) b))) () ) ))
      

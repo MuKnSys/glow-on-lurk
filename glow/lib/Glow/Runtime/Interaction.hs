@@ -36,6 +36,7 @@ data Handle m p d = Handle
   }
 
 -- | A 'ConsensusServer' is used to handle the IO needed to
+
 -- act as a consensus. A typical caller of this interface is
 -- a proxy for some consensus running on a blockchain.
 --
