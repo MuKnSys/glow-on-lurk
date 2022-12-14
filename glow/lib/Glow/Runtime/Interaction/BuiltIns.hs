@@ -15,6 +15,7 @@ evalBuiltIn = \case
   "+" -> \[Integer x , Integer y] -> Right (Integer (x + y))
   "*" -> \[Integer x , Integer y] -> Right (Integer (x * y))
   "/" -> \[Integer x , Integer y] -> Right (Float (fromIntegral x / fromIntegral y))
+  ">" -> \[Integer x , Integer y] -> Right (Boolean (x > y))
   "bitwise-xor" -> \[Integer x , Integer y] -> Right (Integer (xor x y))
   "bitwise-and" -> \[Integer x , Integer y] -> Right (Integer (x .&. y))
   i -> \_ -> Left ((show i) ++ " - builtIn not implemented!") 

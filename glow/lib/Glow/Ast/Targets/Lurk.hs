@@ -39,6 +39,7 @@ data BinOp
   | BOpMinus
   | BOpTimes
   | BOpDiv
+  | BOpGT
   | -- | lurk @=@
     BOpNumEq
   | -- | lurk @eq@

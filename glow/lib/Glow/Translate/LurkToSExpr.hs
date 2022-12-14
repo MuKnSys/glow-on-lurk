@@ -53,6 +53,7 @@ translateBinOp = \case
   BOpMinus -> "-"
   BOpTimes -> "*"
   BOpDiv -> "/"
+  BOpGT -> ">"
   BOpNumEq -> "="
   BOpPtrEq -> "eq"
 

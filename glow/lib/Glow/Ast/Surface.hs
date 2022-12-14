@@ -39,6 +39,7 @@ data BinOp
   | BinOpSub
   | BinOpMul
   | BinOpDiv
+  | BinOpGT
   | BinOpMod
   deriving (Show, Read, Eq)
 

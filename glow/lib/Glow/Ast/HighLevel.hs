@@ -77,6 +77,8 @@ data Builtin
   = BAdd
   | BSub
   | BMul
+  | BDiv
+  | BGT
   | -- TODO: fill out other arithmetic operators
     BOr
   | BAnd

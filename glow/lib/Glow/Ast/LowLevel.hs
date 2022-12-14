@@ -116,6 +116,7 @@ data Op a
   | OpSub
   | OpMul
   | OpDiv
+  | OpGT
   | OpOr
   | OpAnd
   | OpLoad (Type a)
