@@ -22,6 +22,7 @@ import Data.Function
 import Prelude
 
 import Data.List as L
+
 import qualified Data.Map as M
 
 import Data.Maybe (fromMaybe)
@@ -40,6 +41,7 @@ import qualified System.Process as P
 import Text.RawString.QQ
 import Data.UUID
 import Data.UUID.V4
+
 
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey))
 
@@ -114,6 +116,12 @@ verifyCall c =
      liftIO $ putStrLn $ "\n Input for verifier:"
      liftIO $ putStrLn $ render $ mkLurkInput e s c
      x <- liftIO $ callLurk (e ^. stateTransitionVerifierSrc) $ mkLurkInput e s c
+     liftIO $ putStrLn $ "mkLurk Input X : " ++ show x
+     liftIO $ putStrLn $ "render Call : "
+     liftIO $ putStrLn $ show $ render $ renderCall e c
+     liftIO $ putStrLn $ "mkLurk Input E : " ++ show e
+     liftIO $ putStrLn $ "mkLurk Input S : " ++ show s
+     liftIO $ putStrLn $ "mkLurk Input C : " ++ show c
      liftIO $ putStrLn x
      case x of
        "T" -> do
@@ -190,20 +198,78 @@ tempLurkSourceFile = "/tmp/tempLurkSourceFile.json"
 tempClaimFile :: FilePath
 tempClaimFile = "/tmp/state-claim.json"
 
+tempEvalFile :: FilePath
+tempEvalFile = "/tmp/state-eval.txt"
+
+emitsFile :: FilePath
+emitsFile = "/tmp/emits.txt"
+
+replExecutable :: FilePath
+replExecutable = "/home/pawel/Desktop/lurk-rs/target/release/lurkrs"
+
+callLurkDeb :: IO String
+callLurkDeb = do
+  emits <- readFile' tempLurkSourceFile
+  --putStrLn $ show emits
+  let source = A.eitherDecode (BS.fromStrict $ BS.pack emits)
+          >>= parseEither (\obj -> do
+                             s <- obj A..: "expr"
+                             s' <- s A..: "Source"
+                             return (s' :: String))
+  do putStrLn $ show source
+  case source of 
+      Left err -> putStrLn (show source) >> putStrLn err >> error "error while decoding Json"
+      Right (source') -> return (source' :: String)
+
+
+createEvalFile :: IO [String]
+createEvalFile = do
+    input <- callLurkDeb
+    writeFile tempEvalFile input
+    --putStrLn $ show input
+    gen <- P.readProcess replExecutable [tempEvalFile] ""
+    writeFile emitsFile gen
+    -- "/home/pawel/Desktop/lurk-rs/bin/lurkrs" /tmp/ >> /tmp/emits.txt
+    let emits = lines $ T.unpack $ T.unlines $ removeCode $ filterEmits gen
+    return (emits :: [String] )
+    
+    
+    
+
+
+--Text | Text | Text + code | emits | .....
+
+
+filterEmits :: String -> [T.Text]
+filterEmits x = T.splitOn (T.pack "\n") (T.pack x)
+
+removeCode :: [T.Text] -> [T.Text]
+removeCode ( _ : _ : _ : x : xs) =  x : removeCode xs
+removeCode (x : xs) = x : removeCode xs
+removeCode _ =  [] 
 
 
 
 
+
+ 
 callLurk :: LurkSource -> SExpr -> IO String
 callLurk code call = do
-  TIO.writeFile tempLurkSourceFile $ wrapIntoJson $ glowLurkWrapper code call
+  TIO.writeFile tempLurkSourceFile $ wrapIntoJson $ glowLurkWrapper code call 
   r' <- P.readProcess lurkExecutable ["eval","--expression",tempLurkSourceFile] ""
   putStrLn $ show r'
+  putStrLn $ "Call Code: " ++ show call
   let y = A.eitherDecode (BS.fromStrict $ BS.pack r')
           >>= parseEither (\obj -> do                             
                              eout <- obj A..: "expr_out"
                              return (eout :: String))
-  
+  let env = A.eitherDecode (BS.fromStrict $ BS.pack r')
+           >>= parseEither (\obj -> do
+                             envOut <- obj A..: "env_out"
+                             return (envOut :: String))
+  putStrLn $ "Env Out " ++ show env 
+
+  do putStrLn $ "Call Lurk r'': " ++ show y
   case y of
      Left err -> putStrLn (show r') >> putStrLn err >> error "fatal error while calling lurk"
      Right (r'') -> return r''
@@ -226,6 +292,11 @@ wrapIntoJson x = T.replace "<SRC>" (T.filter (\x' -> not $ L.elem x' ("\n\t" :: 
       
 glowLurkWrapper :: LurkSource -> SExpr -> LurkSource
 glowLurkWrapper x y = T.replace "<CALL>" (T.pack $ render y) $ T.replace "<GLOW>" x glowOnLurkLib
+-- $ T.replace "<EMIT>" emit glowOnLurkLib
+
+emit :: T.Text
+emit = T.pack "(emit \"EmitTest \") "
+--emit = T.pack " \" \" "
 
 glowOnLurkLib :: LurkSource
 glowOnLurkLib = [r|(letrec
@@ -257,7 +328,7 @@ glowOnLurkLib = [r|(letrec
      
       
      (sucNat (lambda (x) ( if (eq x ())
-			      '(t)
+ 			      '(t)
 			      (if (car x) (cons nil (sucNat (cdr x))) (cons t (cdr x)))
 			       )))
      
@@ -270,6 +341,7 @@ glowOnLurkLib = [r|(letrec
 		     )))
      	    ))
      (+NAT (lambda (a b) (+NNATh a b ())))
+ 
 
      (*NAT (lambda (a b) (if a (+NAT (if (car a) b ()) (cons () (*NAT (cdr a) b))) () ) ))
      
@@ -298,7 +370,7 @@ glowOnLurkLib = [r|(letrec
 
      (atomic-action-rec (lambda (code case-bind case-next case-pure case-require case-atom)
 			  (if (eq (car code) 'bind)
-			      (case-bind (car (cdr code)) (car (cdr (cdr code))))
+			      (begin (emit code)(case-bind (car (cdr code)) (car (cdr (cdr code)))) )
 			      (if (eq (car code) 'next) (case-next (car (cdr code)) (car (cdr (cdr code))))
 			      (if (eq (car code) 'pure) (case-pure (car (cdr code)))
 				  (if (eq (car code) 'require) (case-require (car (cdr code)))
@@ -381,7 +453,6 @@ coinFlipConsensusState' =
                   { _publicValues = [DigestOf (GLNat 7777)]
                   , _stateId = 1
                   }))])
-
 exampleCall :: Call
 exampleCall = Call 1 (LedgerPubKey "A") (Publish (DigestOf (GLNat 7777)))
 
@@ -401,4 +472,3 @@ singleTest' :: IO Bool
 singleTest' =
    fst <$> evalRWST ((verifyCall exampleCall'') :: LMS Bool) nil coinFlipConsensusState'
 
-   

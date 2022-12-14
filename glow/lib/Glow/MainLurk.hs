@@ -11,6 +11,8 @@ import Glow.Runtime.Interaction.Sim
 
 import Glow.Consensus.Lurk
 
+import Glow.Mock.Lurk.Consensus (createEvalFile)
+
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey))
 
 import Glow.Runtime.Lurk.Commands
@@ -28,13 +30,16 @@ main = do
   args <- getArgs
   case args of
     ("deploy" : file : _) -> do
+       putStrLn $ show file
        pc <- precomp file
+       putStrLn $ "Precompiled File: " ++ show pc 
        params <- map snd <$> parametersPrompt (paramsWithTypes pc)
        ptcps <- participantsPrompt (Id <$> pc ^. pcParticipantNames)
        putStrLn $ show ptcps
        putStrLn $ show params
        
        r <- deployContract pc params ptcps
+       putStrLn $ "Deployed Contract : " ++ show r
        case r of
          Left err -> error err
          Right cid -> putStrLn (UUID.toString cid)
@@ -56,13 +61,25 @@ main = do
     ("interact-cli" : file : cid : pubK : role : paramsS : i : _) -> do 
         pc <- precomp file
         let params = read paramsS
---        putStrLn $ show params
         void $ OS.runInteractionWithServer
                 (LocalInteractEnv
                  pc
                  (LedgerPubKey (pack pubK))
                  (pack role)
                  params) (fromJust $ UUID.fromString cid) i
+
+    ("interact-cli-deb" : file : cid : pubK : role : paramsS : i : _) -> do 
+        pc <- precomp file
+        let params = read paramsS
+        emit <- createEvalFile
+        putStrLn $ "Emits" ++  show emit
+        void $ OS.runInteractionWithServer
+                (LocalInteractEnv
+                 pc
+                 (LedgerPubKey (pack pubK))
+                 (pack role)
+                 params) (fromJust $ UUID.fromString cid) i
+
     ("deploy-cli" : file : paramsS : ptcpsS : _ ) -> do
         pc <- precomp file
         let params = read paramsS
@@ -86,11 +103,15 @@ main = do
             { ISExp.fepExePath = exe,
               ISExp.fepFile = file
             }
+--     do
+      -- putStrLn $ "Fed variable used in precomp: " ++ show fed
      case fed of
        Left e -> error (ISExp.formatError e)
-       Right v -> case (precompile $ v) of
-                     Left err -> error err
-                     Right v' -> return v'
+       Right v -> do putStrLn $ "Precomp function: " ++ show v
+           
+                     case (precompile $ v) of
+                       Left err -> error err
+                       Right v' -> return v'
    
   -- case args of
   --   [file] -> do

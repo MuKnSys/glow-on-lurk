@@ -20,8 +20,8 @@ import Glow.Consensus.Lurk
 import Data.UUID
 
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey))
--- import Data.Text as T
-import Data.Text.Lazy (toStrict,pack)
+--import Data.Text as T
+import Data.Text.Lazy as T (toStrict,pack)
 
 import Control.Monad.RWS (runRWST,liftIO,put)
 import qualified Control.Monad.RWS as CM
@@ -51,6 +51,14 @@ runServer = scotty 3000 $ do
   post "/deploy" $ jsonData >>= atC . deployContract >>= json
 
   post "/interact/:cid" $ param "cid" >>= (\cid -> jsonData >>= atC . interactWithContract cid >> text "done")
+
+  post "/interactEmit/:cid" $ do
+    cid <- param "cid"
+    body <- jsonData
+    jsonData <- atC (interactWithContract cid body)
+    emits <- liftIO $ createEvalFile
+    let response = T.pack $ unlines $ emits
+    text $ response
 
   get "/demo/loadJM" $ atC (put jmConsensusState) >> text "done"
   get "/demo/loadCoinFlip" $ atC (put coinFlipConsensusState) >> text "done"
