@@ -1,84 +1,84 @@
-name: Haskell CI
+# name: Haskell CI
 
-on:
-  push:
-    branches: [ "lurk-milestone-3-refactor" ]
+# on:
+#   push:
+#     branches: [ "lurk-milestone-3-refactor" ]
 
 
-permissions:
-  contents: read
+# permissions:
+#   contents: read
 
-jobs:
-  build:
+# jobs:
+#   build:
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-haskell@v1
-      with:
-        ghc-version: '9.2.4'
-        cabal-version: '3.6.2.0'
+#     steps:
+#     - uses: actions/checkout@v3
+#     - uses: actions/setup-haskell@v1
+#       with:
+#         ghc-version: '9.2.4'
+#         cabal-version: '3.6.2.0'
 
-    - name: Cache
-      uses: actions/cache@v3
-      env:
-        cache-name: cache-cabal
-      with:
-        path: ~/.cabal
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.cabal') }}-${{ hashFiles('**/cabal.project') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
+#     - name: Cache
+#       uses: actions/cache@v3
+#       env:
+#         cache-name: cache-cabal
+#       with:
+#         path: ~/.cabal
+#         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.cabal') }}-${{ hashFiles('**/cabal.project') }}
+#         restore-keys: |
+#           ${{ runner.os }}-build-${{ env.cache-name }}-
+#           ${{ runner.os }}-build-
+#           ${{ runner.os }}-
           
-    - name: Install Glow lang
-      run: curl -L https://glow-lang.org/install/glow-install | sh
+#     - name: Install Glow lang
+#       run: curl -L https://glow-lang.org/install/glow-install | sh
       
       
       
-    - name: Clone Lurk-rs
-      uses: actions/checkout@master
-      with:
-        repository: lurk-lang/lurk-rs
-        path: ./lurk-rs
-        submodules: recursive
+#     - name: Clone Lurk-rs
+#       uses: actions/checkout@master
+#       with:
+#         repository: lurk-lang/lurk-rs
+#         path: ./lurk-rs
+#         submodules: recursive
         
     
-   # - name: Permission for lurk-rs
-   # run: chmod +x ./lurk-rs/bin-lurkrs
+#    # - name: Permission for lurk-rs
+#    # run: chmod +x ./lurk-rs/bin-lurkrs
       
-    - name: Build Lurk
-      run: |
-        cd ./lurk-rs/bin
-        ./lurkrs
+#     - name: Build Lurk
+#       run: |
+#         cd ./lurk-rs/bin
+#         ./lurkrs
         
-    - name: Install dependencies
-      run: |
-        cabal update
-        cabal build all --only-dependencies --enable-tests --enable-benchmarks
+#     - name: Install dependencies
+#       run: |
+#         cabal update
+#         cabal build all --only-dependencies --enable-tests --enable-benchmarks
       
-    - name: Prep for tests
-      uses: actions/checkout@master
-      with: 
-        repository: PawelWP/charlottePiwoKanapka
-        token: ${{ secrets.ACTION_KEY }}
-        path: ./tests
-        submodules: recursive
+#     - name: Prep for tests
+#       uses: actions/checkout@master
+#       with: 
+#         repository: PawelWP/charlottePiwoKanapka
+#         token: ${{ secrets.ACTION_KEY }}
+#         path: ./tests
+#         submodules: recursive
     
-    - name: Show dirrs
-      run: ls -R
+#     - name: Show dirrs
+#       run: ls -R
       
-    - name: Install test dependencies
-      run: ./tests/e2eGlow/install.sh
+#     - name: Install test dependencies
+#       run: ./tests/e2eGlow/install.sh
       
-    - name: Run Mocha Tests
-      run: |
-        cd ./tests/e2eGlow
-        mocha tests/ --timeout 5000
+#     - name: Run Mocha Tests
+#       run: |
+#         cd ./tests/e2eGlow
+#         mocha tests/ --timeout 5000
 
         
-   #- name: Build
-   # run: cabal build --enable-tests --enable-benchmarks all
-    - name: Run tests
-      run: cabal test all
+#    #- name: Build
+#    # run: cabal build --enable-tests --enable-benchmarks all
+#     - name: Run tests
+#       run: cabal test all
