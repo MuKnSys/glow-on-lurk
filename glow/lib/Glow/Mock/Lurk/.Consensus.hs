@@ -27,21 +27,12 @@ import qualified Data.Map as M
 
 import Data.Maybe (fromMaybe)
 
---import Text.SExpression as S
+import Text.SExpression as S
 import qualified Data.Text.Lazy as T
-import qualified Data.Text as TT
-
 import qualified Data.Text.Lazy.IO as TIO
 
-import Glow.Ast.Atoms
+
 import Glow.Consensus.Lurk
-import Glow.Translate.LurkToSExpr
-
-import qualified Data.SCargot as C
--- import qualified Data.SCargot.Atom as A
-import qualified Data.SCargot.Repr as R
-import qualified Data.SCargot.Repr.Basic as B
-
 import qualified GHC.Generics as G
 import Data.Aeson (ToJSON,FromJSON)
 import Data.Aeson.Types (parseEither)
@@ -84,82 +75,37 @@ instance FromJSON ConsensusState where
 initialConsensusState :: ConsensusState
 initialConsensusState = ConsensusState M.empty M.empty
 
-renderCall :: LMEnv -> Call -> R.SExpr Atom
+renderCall :: LMEnv -> Call -> SExpr
 renderCall e c =
   let cId = fromMaybe 0 $ L.elemIndex (c ^. caller) (e ^. identities)
   in case c ^. action of
         Publish _ ->
-          B.L [ B.A (Act PUBLISH)
-              , B.A (Num ( c ^. desiredStateId))
-              , B.A (Num  cId) ]
+          S.List [ S.Atom "PUBLISH"
+                 , S.Atom (show $ c ^. desiredStateId)
+                 , S.Atom (show $ cId ) ]
         _ -> let a = case c ^. action of
-                         Withdraw x -> B.L [B.A (Act WITHDRAW), renderGLValueCall $ GLNat x]
-                         Deposit x -> B.L [B.A (Act DEPOSIT) , renderGLValueCall $ GLNat x]
-                         _ -> B.L [] --imposible case
-             in B.L
-                 [ B.A (Act ACTION)
-                 , B.A (Num (c ^. desiredStateId))
-                 , B.A (Num (cId))
+                         Withdraw x -> S.List [S.Atom "WITHDRAW" , renderGLValue $ GLNat x]
+                         Deposit x -> S.List [S.Atom "DEPOSIT" , renderGLValue $ GLNat x]
+                         _ -> S.List [] --imposible case
+             in S.List
+                 [ S.Atom "ACTION"
+                 , S.Atom (show $ c ^. desiredStateId)
+                 , S.Atom (show $ cId )
                  , a  ]
 
 
---crudeQuote :: R.SExpr a  -> R.SExpr a
---crudeQuote = B.A . ((T.pack ('\'':))) .( C.encode sExpPrinter)
--- printerCheck = C.encode sExpPrinter glowOnLurkLib
+crudeQuote :: SExpr -> SExpr
+crudeQuote = S.Atom . ('\'':) . render
 
-
-mkLurkInput :: LMEnv -> LMState -> Call -> R.SExpr Atom
+mkLurkInput :: LMEnv -> LMState -> Call -> SExpr
 mkLurkInput e s c = 
-  let p :: R.SExpr Atom
-      p = B.L $ (fmap renderGLValueCall (s ^. publicValues))
-      -- qq :: [TT.Text]
-      -- qq =  (fmap (C.encodeOne sExpPrinterA . renderGLValue ) (e ^. interactionParameters))
-      a :: [R.SExpr Atom]
-      a = [renderCall e c]
-      pubValues :: [R.SExpr Atom]
-      pubValues =  (B.A $ LK Quote ) :[(B.A $ Str (T.unpack $ T.fromStrict $ (C.encodeOne sExpPrinterA p)))]
-
-      
-      -- pubs :: R.SExpr Atom
-      -- pubs = B.A $ Str (T.unpack $ T.fromStrict $ TT.unlines $ (fmap (C.encodeOne sExpPrinterA . renderGLValue) (e ^. interactionParameters)) )
-
-      gk :: R.SExpr Atom
-      gk =  B.L $ (B.A $ LK GlowCode) : [(B.A $ Str (T.unpack $ T.fromStrict $ TT.unlines $ (fmap (C.encodeOne sExpPrinterA . renderGLValue) (e ^. interactionParameters)) )) ]
-      ac :: R.SExpr Atom
-      ac = (B.A $ Str (T.unpack $ T.fromStrict $ C.encode sExpPrinterA a))
-      
-  in B.L [
-         (B.A $ LK RunGlow),
-         B.L $ pubValues,
-         gk,
-         if (s ^. stateId == 0) then B.L [] else B.A $ Str $  (show $ s^. stateId),
-         B.L $ ([B.A $ LK Quote, ac])
-         ]
-
-     
-      -- $ Str $ T.unpack $ T.fromStrict $ TT.unlines
-      -- gk = B.L $ (B.A $ LK GlowCode) : [(B.A $ Str $ T.unpack $ T.fromStrict $ ( (fmap ((C.encode sExpPrinterA (renderGLValue) (e ^. interactionParameters) ) )]
-      -- gk = B.L [(fmap (C.encode sExpPrinterA p) (e ^. interactionParameters) )]
-        -- (run-glow (lambda (pubs code start target)
-        
-       -- r,
-       -- gk,        --B.L $ [((B.A "glow-code") : xx (C.encode sExpPrinterA (fmap ( renderGLValue) (e ^. interactionParameters))))]
-        --B.L $ (B.A $ Str "glow-code") : [(B.A $ Str  (fmap ((T.unpack $ T.fromStrict $ C.encode sExpPrinterA a) . renderGLValue) (e ^. interactionParameters)))],
-        -- B.L $ (B.A $ LK GlowCode) : [(B.A $ Str (T.unpack $ T.fromStrict $ C.encode sExpPrinterA (fmap ( renderGLValue) (e ^. interactionParameters))))],
-        --(B.A $ B.L [(T.unpack $ T.fromStrict $ C.encode sExpPrinterA (fmap ( renderGLValue ) (e ^. interactionParameters)))]),
-        -- if (s ^. stateId == 0) then B.L [] else B.A $ Str $  (show $ s^. stateId),
-        --ac
-        -- (B.A $ Str $ T.unpack $ T.fromStrict $  C.encode sExpPrinterA a)
-      
-     -- B.L :: [B.SExpr a] -> B.SExpr a
-      --printer -> T.Text
-    --B.L [
-    --(B.A (Str "run-glow"))
-            -- (C.encode sExpPrinterA p)
-            -- , B.L (B.A "glow-code" : (fmap (undefined . renderGLValue) (e ^. interactionParameters)))
-            -- , if (s ^. stateId == 0) then B.L [] else B.A (show $ s ^. stateId)
-            -- , undefined --C.encode sExpPrinter $ a
-           -- ]  
+  let p = S.List (fmap renderGLValue (s ^. publicValues))
+      a = renderCall e c
+  in S.List [ S.Atom "run-glow"
+            , crudeQuote $ p
+            , S.List (S.Atom "glow-code" : (fmap (crudeQuote . renderGLValue) (e ^. interactionParameters)))
+            , if (s ^. stateId ==0) then S.List [] else S.Atom (show $ s ^. stateId)
+            , crudeQuote $ a]  
   
 
 verifyCall :: (MonadIO m , MonadState ConsensusState m , MonadReader UUID m) => Call -> m Bool 
@@ -168,22 +114,22 @@ verifyCall c =
      e <- gets ((^. initializationData) . ( M.! cUuid) . (^. contracts))
      s <- gets ((^. currentState) . (M.! cUuid  ) . (^. contracts))     
      liftIO $ putStrLn $ "\n Input for verifier:"
---     liftIO $ putStrLn $ render $ mkLurkInput e s c
+     liftIO $ putStrLn $ render $ mkLurkInput e s c
      x <- liftIO $ callLurk (e ^. stateTransitionVerifierSrc) $ mkLurkInput e s c
---      liftIO $ putStrLn $ "mkLurk Input X : " ++ show x
---      liftIO $ putStrLn $ "render Call : "
--- --     liftIO $ putStrLn $ show $ render $ renderCall e c
---      liftIO $ putStrLn $ "mkLurk Input E : " ++ show e
---      liftIO $ putStrLn $ "mkLurk Input S : " ++ show s
---      liftIO $ putStrLn $ "mkLurk Input C : " ++ show c
---      liftIO $ putStrLn x
+     liftIO $ putStrLn $ "mkLurk Input X : " ++ show x
+     liftIO $ putStrLn $ "render Call : "
+     liftIO $ putStrLn $ show $ render $ renderCall e c
+     liftIO $ putStrLn $ "mkLurk Input E : " ++ show e
+     liftIO $ putStrLn $ "mkLurk Input S : " ++ show s
+     liftIO $ putStrLn $ "mkLurk Input C : " ++ show c
+     liftIO $ putStrLn x
      case x of
        "T" -> do
                  liftIO $ putStrLn $ "\nConfirmed validity of call, will execute state change."
                  return True
        lurkOutput -> do
-                 -- liftIO $ putStrLn $ lurkOutput
-                 -- liftIO $ putStrLn $ ""
+                 liftIO $ putStrLn $ lurkOutput
+                 liftIO $ putStrLn $ ""
                  liftIO $ putStrLn $ "\nUnable to confirm validity of call, won't execute state change."
                  return False
     
@@ -308,14 +254,14 @@ clearCall :: String  -> String
 clearCall x = last $ lines x
 
  
-callLurk :: LurkSource -> R.SExpr Atom -> IO String
+callLurk :: LurkSource -> SExpr -> IO String
 callLurk code call = do
   TIO.writeFile tempLurkSourceFile $ wrapIntoJson $ glowLurkWrapper code call 
   r' <- P.readProcess lurkExecutable ["eval","--expression",tempLurkSourceFile] ""
   let clear = clearCall r'
   putStrLn $ "Here is clear code :  " ++ show clear ++ "After there is no more clear code"
   putStrLn $ show r'
- -- putStrLn $ "Call Code: " ++ show call
+  putStrLn $ "Call Code: " ++ show call
   let y = A.eitherDecode (BS.fromStrict $ BS.pack clear)
           >>= parseEither (\obj -> do                             
                              eout <- obj A..: "expr_out"
@@ -348,16 +294,13 @@ wrapIntoJson x = T.replace "<SRC>" (T.filter (\x' -> not $ L.elem x' ("\n\t" :: 
 
 
       
---glowLurkWrapper :: LurkSource -> B.SExpr a -> LurkSource
-    -- x code LurkSource  | y call SExpr
-glowLurkWrapper :: LurkSource -> R.SExpr Atom -> T.Text
-glowLurkWrapper x y = T.replace "<CALL>" (T.fromStrict $ C.encode sExpPrinterA [y] ) $ T.replace "<GLOW>" x glowOnLurkLib 
+glowLurkWrapper :: LurkSource -> SExpr -> LurkSource
+glowLurkWrapper x y = T.replace "<CALL>" (T.pack $ render y) $ T.replace "<GLOW>" x glowOnLurkLib
+-- $ T.replace "<EMIT>" emit glowOnLurkLib
 
---   -- $ T.replace "<EMIT>" emit glowOnLurkLib
+emit :: T.Text
 
--- emit :: T.Text
-
--- emit = T.pack "(emit \"EmitTest \") "
+emit = T.pack "(emit \"EmitTest \") "
 --emit = T.pack " \" \" "
 
 glowOnLurkLib :: LurkSource
@@ -406,9 +349,7 @@ glowOnLurkLib = [r|(letrec
  
 
      (*NAT (lambda (a b) (if a (+NAT (if (car a) b ()) (cons () (*NAT (cdr a) b))) () ) ))
-
-
-     (-NAT (lambda (a b)  (+NNATh a b (if (eq b ()) t ()))))
+     
 
      (PFARROWNat (lambda (a) (if (eq 0 a) () (sucNat (PFARROWNat (- a 1))))))
      
@@ -434,14 +375,11 @@ glowOnLurkLib = [r|(letrec
 
      (atomic-action-rec (lambda (code case-bind case-next case-pure case-require case-atom)
 			  (if (eq (car code) 'bind)
-			     (case-bind (car (cdr code)) (car (cdr (cdr code))))
+			      (begin (emit code)(case-bind (car (cdr code)) (car (cdr (cdr code)))) )
 			      (if (eq (car code) 'next) (case-next (car (cdr code)) (car (cdr (cdr code))))
 			      (if (eq (car code) 'pure) (case-pure (car (cdr code)))
 				  (if (eq (car code) 'require) (case-require (car (cdr code)))
 				      (case-atom code (car (cdr code)) (car code)))))
-
-
-
 
 			   )))
      (glow-code <GLOW>)
@@ -531,13 +469,13 @@ exampleCall'' :: Call
 exampleCall'' = Call 2 (LedgerPubKey "A") (Deposit 12)
 
 
--- singleTest :: IO Bool
--- singleTest =
---    fst <$> evalRWST ((verifyCall exampleCall) :: LMS Bool) nil coinFlipConsensusState
+singleTest :: IO Bool
+singleTest =
+   fst <$> evalRWST ((verifyCall exampleCall) :: LMS Bool) nil coinFlipConsensusState
 
--- singleTest' :: IO Bool
--- singleTest' =
---    fst <$> evalRWST ((verifyCall exampleCall'') :: LMS Bool) nil coinFlipConsensusState'
+singleTest' :: IO Bool
+singleTest' =
+   fst <$> evalRWST ((verifyCall exampleCall'') :: LMS Bool) nil coinFlipConsensusState'
 
 
 

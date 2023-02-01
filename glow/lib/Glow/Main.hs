@@ -48,7 +48,7 @@ main = do
 
 mainCF :: IO ()
 mainCF = do
-  let args = ["glow" , "/Users/Marcin/glow/dapps/coin_flip.glow"]
+  let args = ["glow" , "/Users/pawel/Desktop/glow/dapps/coin_flip.glow"]
   case args of
     [exe, file] -> do
       fed <-

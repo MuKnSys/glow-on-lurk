@@ -79,6 +79,7 @@ data Builtin
   | BMul
   | BDiv
   | BGT
+  | BLT
   | -- TODO: fill out other arithmetic operators
     BOr
   | BAnd

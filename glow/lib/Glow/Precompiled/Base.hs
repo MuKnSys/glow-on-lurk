@@ -44,13 +44,12 @@ precompile fed =
      , Return (TrvExpr (TrexConst CUnit))] -> do
       
          (_ , y) <- markANF 1 stmnts
+         --let outPut = showVerifier aNames <$> (toLMonad y)
+         
          z <- mkVerifier aNames <$> (toLMonad y)
-         return (PrecompiledContract (map idBS pNames) (map idBS aNames) y z (fedTypeTable fed)) 
+         return (PrecompiledContract (map idBS pNames) (map idBS aNames) y z (fedTypeTable fed))
     _ -> Left "not implemented: multiple interactions"
     
-  
-
-
 
 -- coinFlipPC :: PrecompiledContract
 -- coinFlipPC = ?

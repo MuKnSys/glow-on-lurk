@@ -6,6 +6,7 @@ module Glow.Ast.Surface where
 import qualified Data.Text.Lazy as LT
 import Glow.Prelude
 import Numeric.Natural (Natural)
+import qualified Glow.Translate.LurkToSExpr as L
 
 type Str = LT.Text
 
@@ -40,6 +41,7 @@ data BinOp
   | BinOpMul
   | BinOpDiv
   | BinOpGT
+  | BinOpLT
   | BinOpMod
   deriving (Show, Read, Eq)
 

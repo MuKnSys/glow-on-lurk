@@ -1,50 +1,105 @@
 {-# LANGUAGE LambdaCase #-}
+{-# OPTIONS_GHC -Wincomplete-patterns #-}
 
 -- | Translate lurk ASTs into s-expression form.
 module Glow.Translate.LurkToSExpr where
 
 import qualified Data.Text.Lazy as LT
+import qualified Data.Text as T
 import Glow.Ast.Targets.Lurk
 import Glow.Prelude
-import qualified Text.SExpression as S
+import Glow.Ast.Atoms
+import qualified Data.SCargot as C
+import qualified Data.SCargot.Atom  as CA
+import qualified Data.SCargot.Repr as R
+import qualified Data.SCargot.Repr.Basic as B
 
-translateExpr :: Expr a -> S.SExpr
+
+fromAtom :: Atom -> T.Text
+fromAtom (BA T) = "T"
+fromAtom (BA Nil) = "NIL"
+fromAtom (LK If) = "if"
+fromAtom (LK Lambda) = "lambda"
+fromAtom (LK LetBind) = "let"
+fromAtom (LK LetRecBind) = "letrec"
+fromAtom (OP (BinOperator n)) = T.pack ( n)
+fromAtom (OP (UnaryOperator n)) = T.pack ( n)
+fromAtom (LK (Begin)) = "begin"
+fromAtom (LK (CurrentEnv)) = "current-env"
+fromAtom (LK (FieldElem k)) = T.pack ( k)
+fromAtom (LK (Eval)) = "eval"
+fromAtom (Sym s) = T.pack s
+fromAtom (Num a) = T.pack (show a)
+fromAtom (Act WITHDRAW) = T.pack("withdraw")
+fromAtom (Act DEPOSIT) = T.pack("deposit")
+fromAtom (Act ACTION) = T.pack("action")
+fromAtom (Act PUBLISH) = T.pack("publish")
+fromAtom (Str a) = T.pack a
+fromAtom (LK DIGEST) = T.pack ("digest")
+fromAtom (LK Quote) = T.pack ("quote")
+fromAtom (LK Apply) = T.pack ("apply")
+fromAtom (LK RunGlow) = T.pack ("run-glow")
+fromAtom (LK GlowCode) = T.pack ("glow-code")
+fromAtom (LK GlowUnitLit) = T.pack ("glow-unit-lit")
+fromAtom (LK GlowUnitLitQ) = T.pack ("''glow-unit-lit")
+-- fromAtom (BoNum [a]) = T.pack ("quote") 
+
+--fromAtom (KY (Apply))
+fromAtom (LK (EString s)) = T.pack s
+
+
+
+translateExpr :: Expr a -> R.SExpr Atom
 translateExpr = \case
-  ExT _ -> S.Atom "t"
-  ExNil _ -> S.Atom "nil"
+  ExT _ -> B.A (BA T)
+  ExNil _ -> B.A (BA Nil)
   ExIf _ c t e ->
-    S.List [S.Atom "if", translateExpr c, translateExpr t, translateExpr e]
+    (B.L [B.A (LK If), translateExpr c, translateExpr t, translateExpr e])
   ExLambda _ params body ->
-    S.List [S.Atom "lambda", S.List (map translateSymbol params), translateExpr body]
+    (B.L [B.A (LK Lambda),B.L (map translateSymbol params), translateExpr body])
   ExLet _ l ->
-    S.List (S.Atom "let" : translateLet l)
+    (B.L (B.A (LK LetBind) : translateLet l ))
   ExLetRec _ l ->
-    S.List (S.Atom "letrec" : translateLet l)
+    (B.L (B.A (LK LetRecBind) : translateLet l))
   ExBinary _ op l r ->
-    S.List [S.Atom (translateBinOp op), translateExpr l, translateExpr r]
+    (B.L [B.A (OP (BinOperator (translateBinOp op))), translateExpr l, translateExpr r])
   ExUnary _ op arg ->
-    S.List [S.Atom (translateUnaryOp op), translateExpr arg]
+    (B.L [B.A (OP (UnaryOperator (translateUnaryOp op))), translateExpr arg])
   ExBegin _ exs ex ->
-    S.List (S.Atom "begin" : map translateExpr (exs <> [ex]))
+    (B.L (B.A (LK Begin) : map translateExpr (exs <> [ex])))
   ExCurrentEnv _ ->
-    S.List [S.Atom "current-env"]
+    (B.L [B.A (LK CurrentEnv)])
   ExFieldElem _ k ->
-    S.Atom (show k)
+    (B.A (LK (FieldElem (show k))))
   ExEval _ exp Nothing ->
-    S.List [S.Atom "eval", translateExpr exp]
+    (B.L [B.A (LK Eval), translateExpr exp])
   ExEval _ exp (Just env) ->
-    S.List [S.Atom "eval", translateExpr exp, translateExpr env]
+    (B.L [B.A (LK Eval), translateExpr exp, translateExpr env])
   ExSymbol _ sym ->
-    translateSymbol sym
+    translateSymbol sym 
   ExApply _ f args ->
-    S.List $ map translateExpr (f : args)
+    (B.L $ map translateExpr (f: args))
   ExQuote _ sexpr ->
-    S.List [S.Atom "quote", sexpr]
-  ExString _ s -> S.Atom (show s)
+    (B.L $ [B.A $ LK Quote, sexpr])
+  ExString _ s -> 
+    (B.A (LK (EString (show s))))
 
-translateSymbol :: Symbol -> S.SExpr
+--ExQuote a (R.SExpr A.Atom) 
+sExpPrinter :: C.SExprPrinter Atom (Expr a)
+sExpPrinter
+   = C.setFromCarrier translateExpr
+   $ C.flatPrint fromAtom
+
+
+sExpPrinterA
+  = C.basicPrint fromAtom
+
+
+
+  
+translateSymbol :: Symbol -> R.SExpr Atom
 translateSymbol (Symbol txt) =
-  S.Atom (LT.unpack txt)
+ (B.A (Sym (LT.unpack txt)))
 
 translateBinOp :: BinOp -> String
 translateBinOp = \case
@@ -54,8 +109,10 @@ translateBinOp = \case
   BOpTimes -> "*"
   BOpDiv -> "/"
   BOpGT -> ">"
+  BOpLT -> "<"
   BOpNumEq -> "="
   BOpPtrEq -> "eq"
+
 
 translateUnaryOp :: UnaryOp -> String
 translateUnaryOp = \case
@@ -63,15 +120,17 @@ translateUnaryOp = \case
   UOpCdr -> "cdr"
   UOpEmit -> "emit"
 
-translateLet :: Let a -> [S.SExpr]
+translateLet :: Let a -> [B.SExpr Atom]
 translateLet l =
-  [ S.List $ map translateBinding (letBindings l),
+  [ B.L $ map translateBinding (letBindings l),
     translateExpr $ letBody l
   ]
 
-translateBinding :: Binding a -> S.SExpr
+translateBinding :: Binding a -> B.SExpr Atom 
 translateBinding b =
-  S.List
+    B.L
     [ translateSymbol (bKey b),
       translateExpr (bVal b)
     ]
+
+

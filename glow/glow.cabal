@@ -76,6 +76,8 @@ common shared-opts
     , req
     , cryptonite
     , directory >= 1.3
+    , s-cargot >= 0.1.5.0
+
   default-language:    Haskell2010
 
 library
@@ -92,6 +94,7 @@ library
     , Glow.Ast.LowLevel
     , Glow.Ast.LiftedFunctions
     , Glow.Ast.Targets.Lurk
+    , Glow.Ast.Atoms
     , Glow.Parser
     , Glow.Prelude
     , Glow.Runtime.Interaction
@@ -132,7 +135,8 @@ executable glow
   build-depends: directory >= 1.3.6.2,
                  glow,
                  http-client >= 0.7.11,
-                 lens >= 5.1
+                 lens >= 5.1,
+                 s-cargot >= 0.1.5.0
   hs-source-dirs: exe
   main-is: Main.hs
 
@@ -141,7 +145,8 @@ executable lurk-consensus-mock
   build-depends: directory >= 1.3.6.2,
                  glow,
                  http-client >= 0.7.11,
-                 lens >= 5.1
+                 lens >= 5.1,
+                 s-cargot >= 0.1.5.0
   hs-source-dirs: exe
   main-is: LurkConsensusMock.hs  
 
@@ -150,7 +155,8 @@ executable run-glow
   build-depends: directory >= 1.3.6.2,
                  glow,
                  http-client >= 0.7.11,
-                 lens >= 5.1
+                 lens >= 5.1,
+                 s-cargot >= 0.1.5.0
   hs-source-dirs: exe
   main-is: RunGlow.hs
 

@@ -93,6 +93,7 @@ main = do
 
 
  where
+   
    exe = "glow"
 
    precomp :: String -> IO PrecompiledContract
@@ -107,9 +108,7 @@ main = do
       -- putStrLn $ "Fed variable used in precomp: " ++ show fed
      case fed of
        Left e -> error (ISExp.formatError e)
-       Right v -> do putStrLn $ "Precomp function: " ++ show v
-           
-                     case (precompile $ v) of
+       Right v ->case  (precompile $ v) of
                        Left err -> error err
                        Right v' -> return v'
    

@@ -8,7 +8,10 @@ module Glow.Ast.Targets.Lurk where
 
 import Data.Text.Lazy (Text)
 import Glow.Prelude
-import Text.SExpression (SExpr)
+--import Text.SExpression (SExpr)
+import qualified Data.SCargot.Repr as R
+import qualified Glow.Ast.Atoms as A
+import qualified Data.SCargot.Repr.Basic as B
 
 -- | A Lurk expression. The @a@ type parameter can be used to attach
 -- misc. metadata (e.g. debuginfo).
@@ -28,7 +31,7 @@ data Expr a
     ExEval a (Expr a) (Maybe (Expr a))
   | ExSymbol a Symbol
   | ExApply a (Expr a) [Expr a]
-  | ExQuote a SExpr
+  | ExQuote a (R.SExpr A.Atom)  
   | ExString a Text
   deriving (Show, Read, Eq)
 
@@ -40,6 +43,7 @@ data BinOp
   | BOpTimes
   | BOpDiv
   | BOpGT
+  | BOpLT
   | -- | lurk @=@
     BOpNumEq
   | -- | lurk @eq@
