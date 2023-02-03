@@ -1,0 +1,18 @@
+#lang glow
+
+@interaction([A, B])
+
+let bitOr = (parA, parB) => {
+
+    let handA = parA; //10
+    deposit! A -> handA;
+
+    let handB = parB; //20
+    deposit! B -> handB;
+
+    if((handA == 10) || (handB == 10)){
+         withdraw! A <- handA + handB
+    }else{
+         withdraw! B <- handA + handB
+    }
+};

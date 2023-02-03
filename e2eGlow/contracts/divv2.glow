@@ -1,0 +1,14 @@
+#lang glow
+
+@interaction([A, B])
+let dividing = () => {
+    let handA = 40 / 2;
+    deposit! A -> handA;
+
+    let handB = 30 / 3;
+    publish! B -> handB;
+
+    withdraw! A <- handB; //90
+    withdraw! B <- handA // 210
+
+};

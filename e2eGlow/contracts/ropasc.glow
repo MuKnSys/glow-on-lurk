@@ -1,0 +1,28 @@
+#lang glow
+
+@interaction([A, B])
+let rps = (wagerAmount, escrowAmount) => {
+    @A let handA = input(Nat, "First player, pick your hand: 0 (Rock) , 1 (Paper) , 2 (Scissors)");
+    @A require! (handA < 3);
+    @A let salt = randomUInt256();
+    @verifiably! (A) let commitment = digest(handA);
+    publish! A -> commitment; deposit! A -> wagerAmount;
+
+   @B let handB = input(Nat, "Second player, pick your hand: 0 (Rock) , 1 (Paper) , 2 (Scissors)");
+    publish! B -> handB; deposit! B -> wagerAmount;
+    publish! A -> handA;
+    verify! commitment;
+    
+    if(handA == handB){
+      //Draw
+      withdraw! A <- wagerAmount + escrowAmount;
+      withdraw! B <- wagerAmount
+    }else{
+      if(((handA == 0) && (handB == 2)) || ((handA == 1) && (handB == 0)) || ((handA == 2) && (handB == 1))){
+          withdraw! A <- wagerAmount + wagerAmount
+      }else{
+          withdraw! B <- wagerAmount + wagerAmount
+      }
+    }
+
+};

@@ -1,9 +1,0 @@
-packages: */*.cabal
-
-package glow
-  tests: True
-  ghc-options:
-    -Wall -Werror
-    -Wno-name-shadowing
-    -Wno-missing-signatures
-    -Wno-type-defaults

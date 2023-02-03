@@ -1,0 +1,243 @@
+const { expect } = require('chai');
+var chai = require('chai')
+  , chaiHttp = require('chai-http');
+chai.use(chaiHttp);
+var shell = require('shelljs');
+const config = require('../config')
+const {ChildProcess, spawn, spawnSync} = require("child_process")
+const mocha = require ("mocha");
+const { stderr, stdout } = require("process");
+const contractPath = `${config.dapssDir}/transfer_B.glow`
+const runGlowPath = `${config.runGlowDir}/run-glow`
+const lurkMockServerPath = `${config.lurkConsensusMockDir}/lurk-consensus-mock`
+const contractParams = config.contractParamsNoEscrow
+const contractPtcps = config.contractPtcps
+const silent = config.silentMode
+
+var server = null
+var address = null
+describe("Checking 'if', with equal", () => {
+    before(function(done) {
+        setTimeout(done, 1000);
+    });
+    beforeEach(function(done) {
+        setTimeout(done, 500);
+    });
+    it("start lurk mock server", function(done){
+        server = spawn(`cd ; ${lurkMockServerPath} >> /dev/pts/1`, {
+            shell: true,
+            detached: true
+        })
+        server.stderr.on('data', (data) => {
+            console.log(`data: ${data}`);
+            expect(data, "Error while trying to run mock server").to.be.null;
+        }); 
+        done()
+    })
+    it("server check", function(done){
+       chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            done()
+        })
+    })
+    it("load demo values on server", function(done) {
+        chai.request('localhost:3000')
+        .get('/demo/loadJM')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.text).to.equal('done')
+        done()
+        })
+    })
+    it("checking is state correct", function(done){
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            expect(String(res.text)).to.equal('{"_accounts":{"Jan":{"_balance":100},"Marcin":{"_balance":200}},"_contracts":{}}')
+            done()
+        })
+    })
+    it("deploy contract", function(done){
+        address = shell.exec(`cd ; ${runGlowPath} deploy-cli ${contractPath} ${contractParams} ${contractPtcps} `, {silent : silent}).stdout
+        done()
+     })
+    it("checking contract on server ", function(done){
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;        
+            const contract = String(Object.keys(res.body._contracts));
+            expect(res).to.have.status(200);
+            address = address.slice(0,-1)
+            expect(contract).to.equal(address)
+            done()
+        })
+    })    
+    it("#1 interaction call from user A, deposit", function(done){
+        const interactionA = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Jan" "A" ${contractParams}  "" `, {silent :silent})
+        expect(interactionA.stdout, `Cannot interact with consenus: ${interactionA.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it("#1 interaction call from user B, withdraw", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Marcin" "B" ${contractParams}  "" `, {silent : silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it('checking result of transfer', function(done) {
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            var result = Object.values(res.body._accounts)
+            var balanceA = 90
+            var balanceB = 210
+            expect(JSON.stringify(result)).to.equal(`[{"_balance":${balanceA}},{"_balance":${balanceB}}]`)
+            done()
+        })
+    })
+    it("#2 interaction call from user A, deposit", function(done){
+        const interactionA = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Jan" "A" ${contractParams}  "" `, {silent : silent})
+        expect(interactionA.stdout, `Cannot interact with consenus: ${interactionA.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it("#3 interaction call from user A, deposit", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Jan" "A" ${contractParams}  "" `, {silent :silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it("#2 interaction call from user B, withdraw", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Marcin" "B" ${contractParams}  "" `, {silent : silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it('checking result of transfer', function(done) {
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            var result = Object.values(res.body._accounts)
+            var balanceA = 70
+            var balanceB = 220
+            expect(JSON.stringify(result)).to.equal(`[{"_balance":${balanceA}},{"_balance":${balanceB}}]`)
+            done()
+        })
+    })
+    it("#4 interaction call from user A, deposit", function(done){
+        const interactionA = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Jan" "A" ${contractParams}  "" `, {silent : silent})
+        expect(interactionA.stdout, `Cannot interact with consenus: ${interactionA.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it('checking result of multiplication', function(done) {
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            var result = Object.values(res.body._accounts)
+            var balanceA = 90
+            var balanceB = 200
+            expect(JSON.stringify(result)).to.equal(`[{"_balance":${balanceA}},{"_balance":${balanceB}}]`)
+            done()
+        })
+    })
+    it("#3 interaction call from user B, withdraw", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Marcin" "B" ${contractParams}  "" `, {silent : silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it("#4 interaction call from user B, withdraw", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Marcin" "B" ${contractParams}  "" `, {silent : silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it('checking result of multiplication', function(done) {
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            var result = Object.values(res.body._accounts)
+            var balanceA = 80
+            var balanceB = 200
+            expect(JSON.stringify(result)).to.equal(`[{"_balance":${balanceA}},{"_balance":${balanceB}}]`)
+            done()
+        })
+    })
+    it("#5 interaction call from user B, Rock Paper Scissors", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Marcin" "B" ${contractParams}  "" `, {silent : silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it('checking result of multiplication', function(done) {
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            var result = Object.values(res.body._accounts)
+            var balanceA = 90
+            var balanceB = 200
+            expect(JSON.stringify(result)).to.equal(`[{"_balance":${balanceA}},{"_balance":${balanceB}}]`)
+            done()
+        })
+    })
+    it("#6 interaction call from user B, Rock Paper Scissors", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Marcin" "B" ${contractParams}  "" `, {silent : silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it('checking result of multiplication', function(done) {
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            var result = Object.values(res.body._accounts)
+            var balanceA = 80
+            var balanceB = 200
+            expect(JSON.stringify(result)).to.equal(`[{"_balance":${balanceA}},{"_balance":${balanceB}}]`)
+            done()
+        })
+    })
+    it("#7 interaction call from user B, Rock Paper Scissors", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Marcin" "B" ${contractParams}  "" `, {silent :silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it('checking result of multiplication', function(done) {
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            var result = Object.values(res.body._accounts)
+            var balanceA = 90
+            var balanceB = 200
+            expect(JSON.stringify(result)).to.equal(`[{"_balance":${balanceA}},{"_balance":${balanceB}}]`)
+            done()
+        })
+    })
+    it("#8 interaction call from user B, Rock Paper Scissors", function(done){
+        const interactionB = shell.exec(`cd ; ${runGlowPath} interact-cli ${contractPath}  ${address} "Marcin" "B" ${contractParams}  "" `, {silent : silent})
+        expect(interactionB.stdout, `Cannot interact with consenus: ${interactionB.stderr}`).to.equal('Call sent\n')
+        done()
+    })
+    it('checking result of multiplication', function(done) {
+        chai.request('localhost:3000')
+        .get('/state')
+        .end(function (err, res){
+            expect(err).to.be.null;
+            var result = Object.values(res.body._accounts)
+            var balanceA = 100
+            var balanceB = 200
+            expect(JSON.stringify(result)).to.equal(`[{"_balance":${balanceA}},{"_balance":${balanceB}}]`)
+            done()
+        })
+    })
+    it("killing the server", function(done){
+        var exitCode = process.kill(-server.pid);
+        expect(exitCode).to.equal(true)
+        done()
+    })
+}) 

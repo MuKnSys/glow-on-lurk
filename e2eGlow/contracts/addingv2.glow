@@ -1,0 +1,12 @@
+#lang glow
+@interaction([A, B])
+let adding = () => {
+   let handA = 20;
+   deposit! A -> handA;
+
+   let handB = 33;
+   deposit! B -> handB;
+
+   withdraw! B <- handA + handB
+
+}; 

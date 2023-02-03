@@ -1,0 +1,24 @@
+#lang glow
+
+@interaction([A, B])
+let fewif = (parA, parB) => {
+    let handA = parA; //5  50 10 10
+    deposit! A -> handA;
+
+    let handB = parB; //5 50 10 20
+    deposit! B -> handB;
+
+    if(parA <= 10){
+       withdraw! A <- handB //110
+    }else{
+       withdraw! B <- handA //200 190
+    };
+
+    if(parB <= 20){
+       withdraw! B <- handA // 190
+    }else{
+       withdraw! B <- handB //250 210
+    }
+
+
+};
