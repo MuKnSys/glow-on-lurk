@@ -32,14 +32,13 @@ main = do
     ("deploy" : file : _) -> do
        putStrLn $ show file
        pc <- precomp file
-       putStrLn $ "Precompiled File: " ++ show pc 
+       -- putStrLn $ "Precompiled File: " ++ show pc 
        params <- map snd <$> parametersPrompt (paramsWithTypes pc)
        ptcps <- participantsPrompt (Id <$> pc ^. pcParticipantNames)
-       putStrLn $ show ptcps
-       putStrLn $ show params
-       
+       -- putStrLn $ show ptcps
+       -- putStrLn $ show params
        r <- deployContract pc params ptcps
-       putStrLn $ "Deployed Contract : " ++ show r
+       -- putStrLn $ "Deployed Contract : " ++ show r
        case r of
          Left err -> error err
          Right cid -> putStrLn (UUID.toString cid)

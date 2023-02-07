@@ -105,7 +105,7 @@ renderCall e c =
 
 --crudeQuote :: R.SExpr a  -> R.SExpr a
 --crudeQuote = B.A . ((T.pack ('\'':))) .( C.encode sExpPrinter)
--- printerCheck = C.encode sExpPrinter glowOnLurkLib
+
 
 
 mkLurkInput :: LMEnv -> LMState -> Call -> R.SExpr Atom
@@ -118,11 +118,6 @@ mkLurkInput e s c =
       a = [renderCall e c]
       pubValues :: [R.SExpr Atom]
       pubValues =  (B.A $ LK Quote ) :[(B.A $ Str (T.unpack $ T.fromStrict $ (C.encodeOne sExpPrinterA p)))]
-
-      
-      -- pubs :: R.SExpr Atom
-      -- pubs = B.A $ Str (T.unpack $ T.fromStrict $ TT.unlines $ (fmap (C.encodeOne sExpPrinterA . renderGLValue) (e ^. interactionParameters)) )
-
       gk :: R.SExpr Atom
       gk =  B.L $ (B.A $ LK GlowCode) : [(B.A $ Str (T.unpack $ T.fromStrict $ TT.unlines $ (fmap (C.encodeOne sExpPrinterA . renderGLValue) (e ^. interactionParameters)) )) ]
       ac :: R.SExpr Atom
@@ -137,53 +132,21 @@ mkLurkInput e s c =
          ]
 
      
-      -- $ Str $ T.unpack $ T.fromStrict $ TT.unlines
-      -- gk = B.L $ (B.A $ LK GlowCode) : [(B.A $ Str $ T.unpack $ T.fromStrict $ ( (fmap ((C.encode sExpPrinterA (renderGLValue) (e ^. interactionParameters) ) )]
-      -- gk = B.L [(fmap (C.encode sExpPrinterA p) (e ^. interactionParameters) )]
-        -- (run-glow (lambda (pubs code start target)
-        
-       -- r,
-       -- gk,        --B.L $ [((B.A "glow-code") : xx (C.encode sExpPrinterA (fmap ( renderGLValue) (e ^. interactionParameters))))]
-        --B.L $ (B.A $ Str "glow-code") : [(B.A $ Str  (fmap ((T.unpack $ T.fromStrict $ C.encode sExpPrinterA a) . renderGLValue) (e ^. interactionParameters)))],
-        -- B.L $ (B.A $ LK GlowCode) : [(B.A $ Str (T.unpack $ T.fromStrict $ C.encode sExpPrinterA (fmap ( renderGLValue) (e ^. interactionParameters))))],
-        --(B.A $ B.L [(T.unpack $ T.fromStrict $ C.encode sExpPrinterA (fmap ( renderGLValue ) (e ^. interactionParameters)))]),
-        -- if (s ^. stateId == 0) then B.L [] else B.A $ Str $  (show $ s^. stateId),
-        --ac
-        -- (B.A $ Str $ T.unpack $ T.fromStrict $  C.encode sExpPrinterA a)
-      
-     -- B.L :: [B.SExpr a] -> B.SExpr a
-      --printer -> T.Text
-    --B.L [
-    --(B.A (Str "run-glow"))
-            -- (C.encode sExpPrinterA p)
-            -- , B.L (B.A "glow-code" : (fmap (undefined . renderGLValue) (e ^. interactionParameters)))
-            -- , if (s ^. stateId == 0) then B.L [] else B.A (show $ s ^. stateId)
-            -- , undefined --C.encode sExpPrinter $ a
-           -- ]  
-  
-
+     
 verifyCall :: (MonadIO m , MonadState ConsensusState m , MonadReader UUID m) => Call -> m Bool 
 verifyCall c = 
   do cUuid <- ask 
      e <- gets ((^. initializationData) . ( M.! cUuid) . (^. contracts))
      s <- gets ((^. currentState) . (M.! cUuid  ) . (^. contracts))     
-     liftIO $ putStrLn $ "\n Input for verifier:"
+--     liftIO $ putStrLn $ "\n Input for verifier:"
 --     liftIO $ putStrLn $ render $ mkLurkInput e s c
      x <- liftIO $ callLurk (e ^. stateTransitionVerifierSrc) $ mkLurkInput e s c
---      liftIO $ putStrLn $ "mkLurk Input X : " ++ show x
---      liftIO $ putStrLn $ "render Call : "
--- --     liftIO $ putStrLn $ show $ render $ renderCall e c
---      liftIO $ putStrLn $ "mkLurk Input E : " ++ show e
---      liftIO $ putStrLn $ "mkLurk Input S : " ++ show s
---      liftIO $ putStrLn $ "mkLurk Input C : " ++ show c
---      liftIO $ putStrLn x
      case x of
        "T" -> do
                  liftIO $ putStrLn $ "\nConfirmed validity of call, will execute state change."
                  return True
        lurkOutput -> do
                  -- liftIO $ putStrLn $ lurkOutput
-                 -- liftIO $ putStrLn $ ""
                  liftIO $ putStrLn $ "\nUnable to confirm validity of call, won't execute state change."
                  return False
     
@@ -313,27 +276,23 @@ callLurk code call = do
   TIO.writeFile tempLurkSourceFile $ wrapIntoJson $ glowLurkWrapper code call 
   r' <- P.readProcess lurkExecutable ["eval","--expression",tempLurkSourceFile] ""
   let clear = clearCall r'
-  putStrLn $ "Here is clear code :  " ++ show clear ++ "After there is no more clear code"
-  putStrLn $ show r'
- -- putStrLn $ "Call Code: " ++ show call
   let y = A.eitherDecode (BS.fromStrict $ BS.pack clear)
           >>= parseEither (\obj -> do                             
                              eout <- obj A..: "expr_out"
                              return (eout :: String))
 
-  let env = A.eitherDecode (BS.fromStrict $ BS.pack clear)
+  let stateCode = A.eitherDecode (BS.fromStrict $ BS.pack clear)
            >>= parseEither (\obj -> do
-                             envOut <- obj A..: "env_out"
+                             envOut <- obj A..: "expr"
                              return (envOut :: String))
-  putStrLn $ "Env Out " ++ show env 
-
-  do putStrLn $ "Call Lurk r'': " ++ show y
+  -- putStrLn $ "Env Out " ++ show env 
+  putStrLn $ "\nLurk code:\n  " ++ show stateCode
+  putStrLn $ "\nCall code:\n " ++ show call
+  
+  do putStrLn $ "\nLurk evaluation:\n " ++ show y
   case y of
      Left err -> putStrLn (show r') >> putStrLn err >> error "fatal error while calling lurk"
      Right (r'') -> return r''
-  
-
-  
 
 makeVerifier :: IO()
 makeVerifier = do
@@ -346,19 +305,8 @@ wrapIntoJson :: LurkSource -> T.Text
 wrapIntoJson x = T.replace "<SRC>" (T.filter (\x' -> not $ L.elem x' ("\n\t" :: String))  x)
     [r|{"expr":{"Source":"<SRC>"}}|]
 
-
-      
---glowLurkWrapper :: LurkSource -> B.SExpr a -> LurkSource
-    -- x code LurkSource  | y call SExpr
 glowLurkWrapper :: LurkSource -> R.SExpr Atom -> T.Text
 glowLurkWrapper x y = T.replace "<CALL>" (T.fromStrict $ C.encode sExpPrinterA [y] ) $ T.replace "<GLOW>" x glowOnLurkLib 
-
---   -- $ T.replace "<EMIT>" emit glowOnLurkLib
-
--- emit :: T.Text
-
--- emit = T.pack "(emit \"EmitTest \") "
---emit = T.pack " \" \" "
 
 glowOnLurkLib :: LurkSource
 glowOnLurkLib = [r|(letrec
@@ -408,7 +356,7 @@ glowOnLurkLib = [r|(letrec
      (*NAT (lambda (a b) (if a (+NAT (if (car a) b ()) (cons () (*NAT (cdr a) b))) () ) ))
 
 
-     (-NAT (lambda (a b)  (+NNATh a b (if (eq b ()) t ()))))
+     (-NAT (lambda (a b) (+NNATh a b (if (eq b ()) t ()))))
 
      (PFARROWNat (lambda (a) (if (eq 0 a) () (sucNat (PFARROWNat (- a 1))))))
      
@@ -540,117 +488,3 @@ exampleCall'' = Call 2 (LedgerPubKey "A") (Deposit 12)
 --    fst <$> evalRWST ((verifyCall exampleCall'') :: LMS Bool) nil coinFlipConsensusState'
 
 
-
--- glowOnLurkLib = [r|(letrec
---     ((action (lambda (i pid a) (cons 'action (cons i (cons pid (cons a ()))))))
-
---      (withdraw (lambda (n) (cons 'withdraw (cons n ()))))
---      (deposit (lambda (n) (cons 'deposit (cons n ()))))
---      (publish (lambda (i pid) (cons 'publish (cons i (cons pid ())))))
---      (require (lambda (v) (cons 'require (cons v ()))))
-
---      (mk-pure (lambda (a) (cons 'pure (cons a ()))))
---      (mk-bind (lambda (a b) (cons 'bind (cons a (cons b ())))))
---      (mk-next (lambda (a b) (cons 'next (cons a (cons b ())))))
-
-
---      (pure mk-pure)
---      (bind mk-bind)
---      (next mk-next)
-
-     
---      (digestPrim (lambda (a) (cons 'digest (cons a ()) )))
-
---      (eqPrim (lambda (a b) (eq a b)))
-
-     
---      (DIGESTNAT digestPrim)
---      (==Digest eqPrim)
---      (==Nat eqPrim)
-     
-      
---      (sucNat (lambda (x) ( if (eq x ())
---  			      '(t)
--- 			      (if (car x) (cons nil (sucNat (cdr x))) (cons t (cdr x)))
--- 			       )))
-     
---      (+NNATh (lambda (a b carry)
---             (if (eq a ()) (if carry (sucNat b) b)
--- 		(if (eq b ()) (if carry (sucNat a) a)
--- 		    (if (car a)
--- 			(if (car b) (cons carry (+NNATh (cdr a) (cdr b) t)) (cons (if carry () t) (+NNATh (cdr a) (cdr b) carry)))
--- 			(if (car b) (cons (if carry () t) (+NNATh (cdr a) (cdr b) carry)) (cons carry (+NNATh (cdr a) (cdr b) ())))
--- 		     )))
---      	    ))
---      (+NAT (lambda (a b) (+NNATh a b ())))
- 
-
---      (*NAT (lambda (a b) (if a (+NAT (if (car a) b ()) (cons () (*NAT (cdr a) b))) () ) ))
-     
-
---      (PFARROWNat (lambda (a) (if (eq 0 a) () (sucNat (PFARROWNat (- a 1))))))
-     
---      (NatARROWPF (lambda (a) (if a (+ (if (car a) 1 0) (* 2 (NatARROWPF (cdr a)))) 0)))
-
-     
---      (bitwise-xor (lambda (a b) 
--- 		    (if (eq a ()) b
--- 			(if (eq b ()) a
--- 			    (let ((hd ( if (car a) (if (car b) NIL t ) b )) 
--- 				  (tail (bitwise-xor (cdr a) (cdr b) )))
--- 			      (if tail (cons hd tail) hd)
--- 			      )))))
-
---      (bitwise-and (lambda (a b) 
--- 		    (if (eq a ()) ()
--- 			(if (eq b ()) ()
--- 			    ( let ((hd ( if (car a) (car b) NIL ) )
--- 				   (tail (bitwise-and (cdr a) (cdr b) )))
--- 			       (if tail (cons hd tail) hd)
--- 			      )
--- 			    ))))
-
---      (atomic-action-rec (lambda (code case-bind case-next case-pure case-require case-atom)
--- 			  (if (eq (car code) 'bind)
--- 			      (begin (emit code)(case-bind (car (cdr code)) (car (cdr (cdr code)))) )
--- 			      (if (eq (car code) 'next) (case-next (car (cdr code)) (car (cdr (cdr code))))
--- 			      (if (eq (car code) 'pure) (case-pure (car (cdr code)))
--- 				  (if (eq (car code) 'require) (case-require (car (cdr code)))
--- 				      (case-atom code (car (cdr code)) (car code)))))
-
--- 			   )))
---      (glow-code <GLOW>)
---      (run-glow (lambda (pubs code start target)
--- 		 (atomic-action-rec code
--- 				    (lambda (code-a fun-b)
--- 				      (let ((result-a (run-glow pubs code-a start target)))
-					   
--- 					(if (atom result-a) result-a
--- 					    (let ((pubs2 (car (car result-a)))
--- 						  (code2 (fun-b (car (cdr result-a))))
--- 						  (start2 (car (cdr (car result-a)))))
--- 					           (run-glow pubs2 code2 start2 target)
--- 						   ))))
--- 				    (lambda (code-a code-b)
--- 				      (let ((result-a (run-glow pubs code-a start target)))
-					   
--- 					(if (atom result-a) result-a
--- 					    (let ((pubs2 (car (car result-a)))
--- 						  (start2 (car (cdr (car result-a)))))
--- 					           (run-glow pubs2 code-b start2 target)
--- 						   ))))
-
--- 				    (lambda (x) (cons (cons pubs (cons start ())) (cons x ())))
-
--- 				    (lambda (x) (if x (cons (cons pubs (cons start ())) (cons x ())) 'require-fail))
--- 				    (lambda (a id h)
--- 				                  ( if start
---                                                           (let ((new-start (if (eq start id) NIL start ))
--- 								(new-pubs (if (eq h 'publish) (cdr pubs) pubs))
--- 								(result (if (eq h 'publish) (car pubs) 'glow-unit-lit)))
--- 							       (cons (cons new-pubs (cons new-start ())) (cons result ())))
-						             
--- 							  (eq a target)))))))
---   <CALL>
-  
---   )|]
