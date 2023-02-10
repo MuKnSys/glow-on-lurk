@@ -1,0 +1,20 @@
+#lang glow
+
+@interaction([A])
+let transfer = (parA) => {
+   let handA = parA;
+   deposit! A -> handA;
+
+   withdraw! A  <- handA;
+
+   deposit! A -> handA;
+   deposit! A -> handA;
+
+   withdraw! A <- handA;
+
+   deposit! A -> handA;
+
+   withdraw! A <- handA;
+
+   withdraw! A <- handA
+};

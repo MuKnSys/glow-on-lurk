@@ -1,0 +1,19 @@
+#lang glow
+
+@interaction([A, B])
+
+let and = (parA, parB) => {
+
+    let handA = parA;
+    deposit! A -> handA;
+
+    let handB = parB;
+    deposit! B -> handB;
+
+    let bitAnd = handA &&& handB;
+    if(bitAnd == 0){
+         withdraw! A <- handA + handB
+    }else{
+         withdraw! B <- handA + handB
+    }
+};

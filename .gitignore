@@ -25,3 +25,6 @@ cabal.project.local
 auto-save-list
 tramp
 .\#*
+
+# node
+node_modules/

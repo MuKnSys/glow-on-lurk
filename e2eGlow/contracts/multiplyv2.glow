@@ -1,0 +1,14 @@
+#lang glow
+
+@interaction([A, B])
+let multiply = () => {
+    let handA = 20 * 2; //40
+    deposit! A -> handA;
+
+    let handB = 50 * 3;
+    deposit! B -> handB; //150
+
+    withdraw! A <- handB;
+    withdraw! B <- handA
+
+};
