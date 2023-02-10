@@ -11,26 +11,21 @@ module Glow.Consensus.Lurk where
 
 
 import qualified Data.Text.Lazy as T
--- import qualified Data.Text.Lazy.IO as TIO
 import Glow.Prelude
 
 import qualified Data.List as L
 
--- import qualified Glow.Ast.Targets.Lurk as O
-
--- import Prelude (read)
-
 import qualified Data.Text as TT
 
--- import Glow.Translate.LurkToSExpr
+
 import Control.Lens (makeLenses,(.~),(^.),(%~))
--- import qualified Control.Lens as L
+
 
 import qualified GHC.Generics as G
 import Data.Aeson
 import Data.Aeson.Types (toJSONKeyText)
 
-import Numeric (showIntAtBase, showFloat )
+import Numeric (showIntAtBase )
 import Data.Char (intToDigit)
 
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey),lpkBS)
@@ -48,14 +43,13 @@ import Glow.Ast.Atoms
 
 type ParticipantId = Int
 
-data GLType = GLNatT | GLBoolT | GLStringT | GLPFT | DigestT | GLFloatT | GLUnitT
+data GLType = GLNatT | GLBoolT | GLStringT | GLPFT | DigestT | GLUnitT
   deriving (Show , Read , Eq , G.Generic, Ord)
 
 instance ToJSON GLType where
 instance FromJSON GLType where
 
-data GLValue = GLNat Int | GLBool Bool | GLString T.Text | GLPF Int | DigestOf GLValue | GLUnit | GLFloat Float
-  deriving (Show , Read , Eq , G.Generic, Ord)
+data GLValue = GLNat Int | GLBool Bool | GLString T.Text | GLPF Int | DigestOf GLValue | GLUnit deriving (Show , Read , Eq , G.Generic, Ord)
 
 instance ToJSON GLValue where
 instance FromJSON GLValue where
@@ -65,7 +59,7 @@ prettyGLValue :: GLValue -> String
 prettyGLValue = \case
   GLNat k -> show k
   GLBool k -> show k
-  GLFloat k -> show k
+  -- GLFloat k -> show k
   GLString s -> show s
   GLPF k -> show k L.++ "(PF)"
   DigestOf x -> "dig(" L.++ (prettyGLValue x) L.++  ")" 
@@ -121,22 +115,6 @@ makeLenses ''Call
 instance ToJSON Call where
 instance FromJSON Call where
 
--- interationLibHead :: String
--- interationLibHead = "(let ((glow-code "
-
--- interationLibFooter :: String
--- interationLibFooter = "))(current-env))"
-
---myLangParser :: SExprParser Atom Expr
---myLangParser = 
-
--- render :: SExpr -> String
--- render = \case
---   S.Atom x -> x
---   S.List x -> "(" L.++ (L.intercalate " " (render <$> x)) L.++ ")"
---   _ -> "not implemented"
-  --ConsList
-  -- Number x -> pack (show x)
 renderGLValueCall :: GLValue -> R.SExpr Atom
 renderGLValueCall = \case
   GLNat 0 -> B.A $ BA Nil
@@ -144,13 +122,12 @@ renderGLValueCall = \case
                                               '1' -> B.A $ BA T
                                               _ -> B.A $ BA Nil)
                    (reverse $ showIntAtBase 2 intToDigit k "")
-
-  GLFloat k -> B.L $ map (\case
-                               '1' -> B.A (BA T)
-                               _ -> B.A (BA Nil))
-                        (reverse $ showFloat k ""  )
+  -- GLFloat k -> B.L $ map (\case
+  --                              '1' -> B.A $ BA T
+  --                              _ -> B.A $ BA Nil)
+  --                       (reverse $ showFloat k ""  )
                
-  GLBool k -> if k then (B.A (BA T)) else  B.A (BA Nil)
+  GLBool k -> if k then B.A $ BA T else  B.A $ BA Nil
   GLString k -> (B.A $ Str (T.unpack k))
   GLPF k -> (B.A $ Num k)
   DigestOf x -> B.L [B.A $ LK DIGEST , renderGLValueCall x]
@@ -160,20 +137,15 @@ renderGLValue :: GLValue -> R.SExpr Atom
 renderGLValue = \case
   GLNat 0 -> B.A (BA Nil)
   GLNat k ->  B.L $ (B.A $ LK Quote) : [B.L $ (map (\case
-                                              '1' -> B.A (BA T)
-                                              _ -> B.A (BA Nil))
+                                              '1' -> B.A $ BA T
+                                              _ -> B.A $ BA Nil)
                    (reverse $ showIntAtBase 2 intToDigit k ""))]
-  -- GLNat k -> B.L $ (map (\case
-  --                             '1' -> B.A (BA T)
-  --                             _ -> B.A (BA Nil)))
-                              
-                        
-  GLFloat k -> B.L $ map (\case
-                               '1' -> B.A (BA T)
-                               _ -> B.A (BA Nil))
+  -- GLFloat k -> B.L $ map (\case
+  --                              '1' -> B.A $ BA T
+  --                              _ -> B.A $ BA Nil)
                 
-                        (reverse $ showFloat k ""  )
-  GLBool k -> if k then (B.A (BA T)) else  B.A (BA Nil)
+  --                       (reverse $ showFloat k ""  )
+  GLBool k -> if k then B.A $ BA T else  B.A $ BA Nil
   GLString k -> (B.A $ Str (T.unpack k))
   GLPF k -> (B.A $ Num k)
   DigestOf x -> B.L [B.A $ LK DIGEST , renderGLValueCall x]
@@ -187,22 +159,18 @@ translateGLValue = \case
                                _ -> B.A $ BA Nil) 
                          (reverse $ showIntAtBase 2 intToDigit k "")
 
-  GLFloat k -> LT.ExQuote () $ B.L $ map (\case
-                                '1' -> B.A $ BA T
-                                _ -> B.A $ BA Nil)
-                        (reverse $ showFloat k "")
-  --       -- LT.mkConsList $ map (\case
-  --       --                       '1' -> LT.ExT ()
-  --       --                       _ -> LT.ExNil ())
-                              
-        --                 (reverse $ showIntAtBase 2 intToDigit k "")
+  -- GLFloat k -> LT.ExQuote () $ B.L $ map (\case
+  --                               '1' -> B.A $ BA T
+  --                               _ -> B.A $ BA Nil)
+  --                       (reverse $ showFloat k "")
+
   GLBool k -> if k then (LT.ExT ()) else LT.ExNil ()
   GLString s -> (LT.ExString () $ s)
   GLPF k -> LT.ExFieldElem () k
   DigestOf x -> LT.mkConsList $ [LT.ExQuote () (B.A $ LK DIGEST), translateGLValue x]
-    --LT.ExQuote () $ B.L $ (B.A $ LK DIGEST) : [B.A $ translateGLValue x] 
+
   GLUnit -> LT.ExQuote () (B.A $ LK GlowUnitLit)
-    --(LT.ExSymbol () $ "'glow-unit-lit")
+
 
 
 

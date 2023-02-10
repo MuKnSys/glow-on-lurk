@@ -15,6 +15,11 @@ import Glow.Mock.Lurk.Consensus (createEvalFile)
 
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey))
 
+import System.Exit (exitSuccess)
+import Control.Exception (catch, SomeException)
+
+
+
 import Glow.Runtime.Lurk.Commands
 import Glow.Runtime.Interaction.InteractWithServer
 import qualified Glow.Runtime.Interaction.InteractWithServerOneStep as OS
@@ -30,15 +35,11 @@ main = do
   args <- getArgs
   case args of
     ("deploy" : file : _) -> do
-       putStrLn $ show file
        pc <- precomp file
-       -- putStrLn $ "Precompiled File: " ++ show pc 
        params <- map snd <$> parametersPrompt (paramsWithTypes pc)
        ptcps <- participantsPrompt (Id <$> pc ^. pcParticipantNames)
-       -- putStrLn $ show ptcps
-       -- putStrLn $ show params
        r <- deployContract pc params ptcps
-       -- putStrLn $ "Deployed Contract : " ++ show r
+
        case r of
          Left err -> error err
          Right cid -> putStrLn (UUID.toString cid)
@@ -68,16 +69,17 @@ main = do
                  params) (fromJust $ UUID.fromString cid) i
 
     ("interact-cli-deb" : file : cid : pubK : role : paramsS : i : _) -> do 
-        pc <- precomp file
-        let params = read paramsS
-        emit <- createEvalFile
-        putStrLn $ "Emits" ++  show emit
-        void $ OS.runInteractionWithServer
-                (LocalInteractEnv
-                 pc
-                 (LedgerPubKey (pack pubK))
-                 (pack role)
-                 params) (fromJust $ UUID.fromString cid) i
+      pc <- precomp file
+      let params = read paramsS
+      catch (OS.runInteractionWithServer
+             (LocalInteractEnv
+              pc
+              (LedgerPubKey (pack pubK))
+              (pack role)
+              params) (fromJust $ UUID.fromString cid) i >> exitSuccess) 
+            (\e -> print (show (e :: SomeException)) >> return ())
+      emit <- createEvalFile
+      putStrLn $ "Emits" ++  show emit
 
     ("deploy-cli" : file : paramsS : ptcpsS : _ ) -> do
         pc <- precomp file

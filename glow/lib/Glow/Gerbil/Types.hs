@@ -134,7 +134,7 @@ data GlowValue
   | Signature LedgerSignature
   | ByteString ByteString
   | Integer Integer
-  | Float Float
+  -- | Float Float
   | Boolean Bool
   | Unit
   deriving stock (Generic, Eq, Show)

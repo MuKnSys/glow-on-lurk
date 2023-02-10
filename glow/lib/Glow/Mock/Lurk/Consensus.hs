@@ -27,7 +27,7 @@ import qualified Data.Map as M
 
 import Data.Maybe (fromMaybe)
 
---import Text.SExpression as S
+
 import qualified Data.Text.Lazy as T
 import qualified Data.Text as TT
 
@@ -38,7 +38,6 @@ import Glow.Consensus.Lurk
 import Glow.Translate.LurkToSExpr
 
 import qualified Data.SCargot as C
--- import qualified Data.SCargot.Atom as A
 import qualified Data.SCargot.Repr as R
 import qualified Data.SCargot.Repr.Basic as B
 
@@ -103,17 +102,13 @@ renderCall e c =
                  , a  ]
 
 
---crudeQuote :: R.SExpr a  -> R.SExpr a
---crudeQuote = B.A . ((T.pack ('\'':))) .( C.encode sExpPrinter)
-
 
 
 mkLurkInput :: LMEnv -> LMState -> Call -> R.SExpr Atom
 mkLurkInput e s c = 
   let p :: R.SExpr Atom
       p = B.L $ (fmap renderGLValueCall (s ^. publicValues))
-      -- qq :: [TT.Text]
-      -- qq =  (fmap (C.encodeOne sExpPrinterA . renderGLValue ) (e ^. interactionParameters))
+
       a :: [R.SExpr Atom]
       a = [renderCall e c]
       pubValues :: [R.SExpr Atom]
@@ -138,8 +133,6 @@ verifyCall c =
   do cUuid <- ask 
      e <- gets ((^. initializationData) . ( M.! cUuid) . (^. contracts))
      s <- gets ((^. currentState) . (M.! cUuid  ) . (^. contracts))     
---     liftIO $ putStrLn $ "\n Input for verifier:"
---     liftIO $ putStrLn $ render $ mkLurkInput e s c
      x <- liftIO $ callLurk (e ^. stateTransitionVerifierSrc) $ mkLurkInput e s c
      case x of
        "T" -> do
@@ -227,7 +220,7 @@ replExecutable = "/home/pawel/Desktop/lurk-rs/target/release/lurkrs"
 callLurkDeb :: IO String
 callLurkDeb = do
   emits <- readFile' tempLurkSourceFile
-  --putStrLn $ show emits
+  putStrLn $ show emits
   let source = A.eitherDecode (BS.fromStrict $ BS.pack emits)
           >>= parseEither (\obj -> do
                              s <- obj A..: "expr"
@@ -243,34 +236,25 @@ createEvalFile :: IO [String]
 createEvalFile = do
     input <- callLurkDeb
     writeFile tempEvalFile input
-    --putStrLn $ show input
+    -- putStrLn $ show input
     gen <- P.readProcess replExecutable [tempEvalFile] ""
     writeFile emitsFile gen
-    -- "/home/pawel/Desktop/lurk-rs/bin/lurkrs" /tmp/ >> /tmp/emits.txt
+    putStrLn $ gen
     let emits = lines $ T.unpack $ T.unlines $ removeCode $ filterEmits gen
     return (emits :: [String] )
-    
-    
-    
-
-
---Text | Text | Text + code | emits | .....
 
 
 filterEmits :: String -> [T.Text]
 filterEmits x = T.splitOn (T.pack "\n") (T.pack x)
 
 removeCode :: [T.Text] -> [T.Text]
-removeCode ( _ : _ : _ : x : xs) =  x : removeCode xs
-removeCode (x : xs) = x : removeCode xs
-removeCode _ =  [] 
-
+removeCode (_:_:xs) = xs
+removeCode xs = xs
 
 
 clearCall :: String  -> String
 clearCall x = last $ lines x
 
- 
 callLurk :: LurkSource -> R.SExpr Atom -> IO String
 callLurk code call = do
   TIO.writeFile tempLurkSourceFile $ wrapIntoJson $ glowLurkWrapper code call 
@@ -312,8 +296,8 @@ glowOnLurkLib :: LurkSource
 glowOnLurkLib = [r|(letrec
     ((action (lambda (i pid a) (cons 'action (cons i (cons pid (cons a ()))))))
 
-     (withdraw (lambda (n) (cons 'withdraw (cons n ()))))
-     (deposit (lambda (n) (cons 'deposit (cons n ()))))
+     (withdraw (lambda (n) (begin (emit n) (cons 'withdraw (cons n ())))))
+     (deposit (lambda (n) (begin (emit n) (cons 'deposit (cons n ())))))
      (publish (lambda (i pid) (cons 'publish (cons i (cons pid ())))))
      (require (lambda (v) (cons 'require (cons v ()))))
 
@@ -355,8 +339,7 @@ glowOnLurkLib = [r|(letrec
 
      (*NAT (lambda (a b) (if a (+NAT (if (car a) b ()) (cons () (*NAT (cdr a) b))) () ) ))
 
-
-     (-NAT (lambda (a b) (+NNATh a b (if (eq b ()) t ()))))
+     (-NAT (lambda (a b)  (+NNATh a b (if (eq b ()) t ()))))
 
      (PFARROWNat (lambda (a) (if (eq 0 a) () (sucNat (PFARROWNat (- a 1))))))
      
@@ -382,7 +365,7 @@ glowOnLurkLib = [r|(letrec
 
      (atomic-action-rec (lambda (code case-bind case-next case-pure case-require case-atom)
 			  (if (eq (car code) 'bind)
-			     (case-bind (car (cdr code)) (car (cdr (cdr code))))
+			     (begin (emit code)(case-bind (car (cdr code)) (car (cdr (cdr code)))))
 			      (if (eq (car code) 'next) (case-next (car (cdr code)) (car (cdr (cdr code))))
 			      (if (eq (car code) 'pure) (case-pure (car (cdr code)))
 				  (if (eq (car code) 'require) (case-require (car (cdr code)))

@@ -18,7 +18,7 @@ import qualified Data.Text.Lazy  as LT
 import Data.ByteString.Char8 (unpack)
 -- import qualified Data.ByteString as BS
 
---import Glow.Translate.LurkToSExpr (translateExpr)
+
 import Glow.Translate.LurkToSExpr(translateExpr ,sExpPrinter)
 import Glow.Ast.Atoms
 import Data.SCargot.Print
@@ -93,20 +93,4 @@ lMonadToLurk = \case
 mkVerifier :: [Id] -> LMonad -> String
 mkVerifier ptsp m =
   LT.unpack $ LT.fromStrict $ (C.encode sExpPrinter [(L.ExLambda () (map (\i -> L.Symbol (LT.pack (unpack (idBS i)))) ptsp)(lMonadToLurk m))])
---TODO render Sexpr 
 
-
-
-
---   -  C.render $ translateExpr $
--- -   L.ExLambda () (map (\i -> L.Symbol (pack (unpack (idBS i)))) ptsp)(lMonadToLurk m)
-
--- showVerifier :: [Id] -> LMonad -> IO ()
--- showVerifier ptsp m = do
---   putStrLn $ "verifier show ptsp: " ++ show ptsp
---   let outPut = C.render $ translateExpr $   L.ExLambda () (map (\i -> L.Symbol (pack (unpack (idBS i)))) ptsp)(lMonadToLurk m)
---   putStrLn outPut
--- lMonadIO :: IO ()
--- lMonadIO = do
--- lMonadToString :: LMonad -> String
--- lMonadToString = C.render . translateExpr . lMonadToLurk
