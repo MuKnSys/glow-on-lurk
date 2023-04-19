@@ -155,4 +155,4 @@ Assuming that the zk-snark verifier can be implemented directly on FVM, we can d
 We can imagine that FVM may be extended with primitives to store zk-snark verifiers, and native instructions to verify proofs. The host FVM contract would still contrain glue code for storing contract state, preparing inputs for verifier, holding funds, and providing an endpoint for calling state transitions.
 
 #### 3. Native support for GlowOnLurk in the Filecoin network
-Described functionalities could be implemented independently from FVM, by implementing endpoints for deployment, calling, and querying Glow contracts as functionalities of Fielcoin nodes.
+Described functionalities could be implemented independently from FVM, by implementing endpoints for deployment, calling, and querying Glow contracts as functionalities of Filecoin nodes.
