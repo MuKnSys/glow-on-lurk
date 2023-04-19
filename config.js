@@ -1,7 +1,7 @@
 const config = {
-    dapssDir : __dirname + '/contracts',
-    runGlowDir: '$HOME/Desktop/glowOnLurk/dist-newstyle/build/x86_64-linux/ghc-9.2.4/glow-0.1.0.0/x/run-glow/build/run-glow',
-    lurkConsensusMockDir: '$HOME/Desktop/glowOnLurk/dist-newstyle/build/x86_64-linux/ghc-9.2.4/glow-0.1.0.0/x/lurk-consensus-mock/build/lurk-consensus-mock',
+    dapssDir : __dirname + '/e2eGlow/contracts',
+    runGlowDir: __dirname + '/dist-newstyle/build/x86_64-linux/ghc-9.2.7/glow-0.1.0.0/x/run-glow/build/run-glow',
+    lurkConsensusMockDir:  __dirname + '/dist-newstyle/build/x86_64-linux/ghc-9.2.7/glow-0.1.0.0/x/lurk-consensus-mock/build/lurk-consensus-mock',
     contractParams : `"[GLNat 10, GLNat 20]"`,
     contractSParams : `"[GLNat 10, GLNat 10]"`,
     contractParamsEqual : `"[GLNat 40, GLNat 40]"`,
@@ -15,6 +15,5 @@ const config = {
     beforeTime : 1000,
     beforeEachTime : 500,
     serverAddress : 'localhost:3000'
-
 }
 module.exports = config

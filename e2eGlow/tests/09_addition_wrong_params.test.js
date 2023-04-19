@@ -3,7 +3,7 @@ var chai = require('chai')
   , chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 var shell = require('shelljs');
-const config = require('../config')
+const config = require('../../config');
 const {spawn} = require("child_process")
 const contractPath = `${config.dapssDir}/adding.glow`
 const runGlowPath = `${config.runGlowDir}/run-glow`

@@ -4,7 +4,7 @@ var chai = require('chai')
 chai.use(chaiHttp);
 const {spawn} = require("child_process")
 var shell = require('shelljs');
-const config = require('../config')
+const config = require('../../config');
 const contractPath = `${config.dapssDir}/coin_flip.glow`
 const runGlowPath = `${config.runGlowDir}/run-glow`
 const lurkMockServerPath = `${config.lurkConsensusMockDir}/lurk-consensus-mock`

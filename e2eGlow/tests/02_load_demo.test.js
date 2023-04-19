@@ -3,7 +3,7 @@ var chai = require('chai')
   , chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 const {spawn} = require("child_process")
-const config = require ('../config')
+const config = require('../../config');
 const lurkMockServerPath = `${config.lurkConsensusMockDir}/lurk-consensus-mock`
 var server = null
 const time = config.beforeTime;

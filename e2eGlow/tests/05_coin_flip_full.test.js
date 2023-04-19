@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const chai = require('chai')
   , chaiHttp = require('chai-http');
 chai.use(chaiHttp);
-const config = require('../config.js')
+const config = require('../../config');
 const shell = require('shelljs');
 const {spawn} = require("child_process")
 const contractPath = `${config.dapssDir}/coin_flip.glow`
