@@ -280,7 +280,7 @@ callLurk code call = do
 
 makeVerifier :: IO()
 makeVerifier = do
-  verifier <- P.readProcess lurkExecutable ["eval","--expression", tempLurkSourceFile ,"--claim", "/tmp/state-claim1.json" ] ""
+  verifier <- P.readProcess lurkExecutable ["eval","--expression", tempLurkSourceFile ,"--claim", "/tmp/state-claim.json" ] ""
   putStrLn $ show verifier 
   proof <- P.readProcess lurkExecutable [ "prove", "--claim", tempClaimFile, "--proof", "/tmp/state-proof.json"] ""
   putStrLn $ show proof
