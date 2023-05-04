@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module Glow.MainLurk (main) where
 
 import qualified Glow.Gerbil.ImportSExpr as ISExp
@@ -11,7 +12,7 @@ import Glow.Runtime.Interaction.Sim
 
 import Glow.Consensus.Lurk
 
-import Glow.Mock.Lurk.Consensus (createEvalFile)
+import qualified Glow.Mock.Lurk.Consensus as LC
 
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey))
 
@@ -29,21 +30,29 @@ import Data.Maybe (fromJust)
 import Prelude
 import Control.Lens 
 import Data.ByteString.Char8 (unpack,pack)
+import qualified Data.ByteString.Lazy as BS
+import System.Directory
+import Control.Monad.Reader
+import Data.Aeson
+
 
 main :: IO ()
 main = do
   args <- getArgs
   case args of
-    ("deploy" : file : _) -> do
+    ("deploy" : file : config : _) -> do
        pc <- precomp file
        params <- map snd <$> parametersPrompt (paramsWithTypes pc)
        ptcps <- participantsPrompt (Id <$> pc ^. pcParticipantNames)
        r <- deployContract pc params ptcps
-
+       config <- LC.loadConfig config
+       runReaderT LC.foo config
+       runReaderT LC.lurkExecutable config
+       runReaderT LC.callLurk config
        case r of
          Left err -> error err
          Right cid -> putStrLn (UUID.toString cid)
-    ("interact" : file : _) -> do
+    ("interact" : file : config : _) -> do
        pc <- precomp file
        putStrLn "enter contract address:"      
        cid <- getLine
@@ -58,7 +67,7 @@ main = do
                  (LedgerPubKey (pack pubK))
                  (pack role)
                  params) (fromJust $ UUID.fromString cid) 
-    ("interact-cli" : file : cid : pubK : role : paramsS : i : _) -> do 
+    ("interact-cli" : file : config : cid : pubK : role : paramsS : i : _) -> do 
         pc <- precomp file
         let params = read paramsS
         void $ OS.runInteractionWithServer
@@ -68,7 +77,7 @@ main = do
                  (pack role)
                  params) (fromJust $ UUID.fromString cid) i
 
-    ("interact-cli-deb" : file : cid : pubK : role : paramsS : i : _) -> do 
+    ("interact-cli-deb" : file : config: cid : pubK : role : paramsS : i : _) -> do 
       pc <- precomp file
       let params = read paramsS
       catch (OS.runInteractionWithServer
@@ -78,10 +87,10 @@ main = do
               (pack role)
               params) (fromJust $ UUID.fromString cid) i >> exitSuccess) 
             (\e -> print (show (e :: SomeException)) >> return ())
-      emit <- createEvalFile
+      emit <- LC.createEvalFile
       putStrLn $ "Emits" ++  show emit
 
-    ("deploy-cli" : file : paramsS : ptcpsS : _ ) -> do
+    ("deploy-cli" : file : config : paramsS : ptcpsS : _ ) -> do
         pc <- precomp file
         let params = read paramsS
         let ptcps = read ptcpsS

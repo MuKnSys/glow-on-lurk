@@ -1,0 +1,6 @@
+{
+    "lurkExecutable": "/home/pawel/Desktop/lurk-rs/target/release/fcomm",
+    "replExecutable": "/home/pawel/Desktop/lurk-rs/target/release/lurkrs",
+    "dappPath" : "/home/pawel/Desktop/glow/dapps/coinFlip.glow"
+}
+  

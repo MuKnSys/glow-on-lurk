@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
@@ -37,10 +38,10 @@ import Glow.Ast.Atoms
 import Glow.Consensus.Lurk
 import Glow.Translate.LurkToSExpr
 
+
 import qualified Data.SCargot as C
 import qualified Data.SCargot.Repr as R
 import qualified Data.SCargot.Repr.Basic as B
-
 import qualified GHC.Generics as G
 import Data.Aeson (ToJSON,FromJSON)
 import Data.Aeson.Types (parseEither)
@@ -49,6 +50,9 @@ import qualified System.Process as P
 import Text.RawString.QQ
 import Data.UUID
 import Data.UUID.V4
+import Control.Monad.Reader
+import qualified Data.ByteString.Lazy as BL
+
 
 
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey))
@@ -78,7 +82,7 @@ makeLenses ''ConsensusState
 instance ToJSON ConsensusState where
 instance FromJSON ConsensusState where
 
-  
+type ConsensusM = ReaderT Config IO 
 
 initialConsensusState :: ConsensusState
 initialConsensusState = ConsensusState M.empty M.empty
@@ -128,20 +132,20 @@ mkLurkInput e s c =
 
      
      
-verifyCall :: (MonadIO m , MonadState ConsensusState m , MonadReader UUID m) => Call -> m Bool 
-verifyCall c = 
-  do cUuid <- ask 
-     e <- gets ((^. initializationData) . ( M.! cUuid) . (^. contracts))
-     s <- gets ((^. currentState) . (M.! cUuid  ) . (^. contracts))     
-     x <- liftIO $ callLurk (e ^. stateTransitionVerifierSrc) $ mkLurkInput e s c
-     case x of
-       "T" -> do
-                 liftIO $ putStrLn $ "\nConfirmed validity of call, will execute state change."
-                 return True
-       lurkOutput -> do
-                 -- liftIO $ putStrLn $ lurkOutput
-                 liftIO $ putStrLn $ "\nUnable to confirm validity of call, won't execute state change."
-                 return False
+verifyCall :: (MonadIO m , MonadState ConsensusState m , MonadReader UUID m ) => Call -> m Bool 
+verifyCall c = undefined
+  -- do cUuid <- ask 
+  --    e <- gets ((^. initializationData) . ( M.! cUuid) . (^. contracts))
+  --    s <- gets ((^. currentState) . (M.! cUuid  ) . (^. contracts))     
+  --    x <- liftIO $ callLurk (e ^. stateTransitionVerifierSrc) $ mkLurkInput e s c
+  --    case x of
+  --      "T" -> do
+  --                liftIO $ putStrLn $ "\nConfirmed validity of call, will execute state change."
+  --                return True
+  --      lurkOutput -> do
+  --                -- liftIO $ putStrLn $ lurkOutput
+  --                liftIO $ putStrLn $ "\nUnable to confirm validity of call, won't execute state change."
+  --                return False
     
 executeCall :: (MonadIO m , MonadState ConsensusState m , MonadReader UUID m) =>  Call -> m () 
 executeCall c = do
@@ -199,8 +203,38 @@ interactWithContract u x = void $ runAtContract u $ do
 overrideConsensusState :: ConsensusState -> CMS ()
 overrideConsensusState x = put x
 
-lurkExecutable :: FilePath
-lurkExecutable = "/home/pawel/Desktop/lurk-rs/target/release/fcomm"
+
+--Config load
+data Config = Config
+              { lurkExecutable1 :: FilePath
+              , replExecutable1 :: FilePath
+              , dappPath :: FilePath
+              }
+
+instance FromJSON Config where
+  parseJSON = A.withObject "Config" $ \o -> do
+    lurkExecutable1 <- o A..: "lurkExecutable"
+    replExecutable1 <- o A..: "replExecutable"
+    return Config {..}
+
+
+loadConfig :: FilePath -> IO Config
+loadConfig configFile = do
+  configFileContents <- BL.readFile configFile
+  case A.eitherDecode configFileContents of
+    Left err -> error err
+    Right config -> return config
+
+
+
+foo :: ConsensusM ()
+foo = do
+  cfg <- ask
+  liftIO $ putStrLn $ "Lurk executable: " ++ lurkExecutable1 cfg 
+
+
+
+
 
 tempLurkSourceFile :: FilePath
 tempLurkSourceFile = "/tmp/tempLurkSourceFile.json"
@@ -255,10 +289,18 @@ removeCode xs = xs
 clearCall :: String  -> String
 clearCall x = last $ lines x
 
-callLurk :: LurkSource -> R.SExpr Atom -> IO String
+
+lurkExecutable :: ConsensusM FilePath
+lurkExecutable = do
+  cfg <- ask
+  let filePath = lurkExecutable1 cfg
+  return filePath 
+
+callLurk :: LurkSource -> R.SExpr Atom -> ConsensusM ()
 callLurk code call = do
-  TIO.writeFile tempLurkSourceFile $ wrapIntoJson $ glowLurkWrapper code call 
-  r' <- P.readProcess lurkExecutable ["eval","--expression",tempLurkSourceFile] ""
+  lift $ TIO.writeFile tempLurkSourceFile $ wrapIntoJson $ glowLurkWrapper code call
+  le <- lurkExecutable
+  r' <- P.readProcess le ["eval","--expression",tempLurkSourceFile] ""
   let clear = clearCall r'
   let y = A.eitherDecode (BS.fromStrict $ BS.pack clear)
           >>= parseEither (\obj -> do                             
@@ -269,20 +311,21 @@ callLurk code call = do
            >>= parseEither (\obj -> do
                              envOut <- obj A..: "expr"
                              return (envOut :: String))
-  -- putStrLn $ "Env Out " ++ show env 
   putStrLn $ "\nLurk code:\n  " ++ show stateCode
   putStrLn $ "\nCall code:\n " ++ show call
   
   do putStrLn $ "\nLurk evaluation:\n " ++ show y
   case y of
      Left err -> putStrLn (show r') >> putStrLn err >> error "fatal error while calling lurk"
-     Right (r'') -> return r''
+     Right (r'') -> r''
+
 
 makeVerifier :: IO()
 makeVerifier = do
-  verifier <- P.readProcess lurkExecutable ["eval","--expression", tempLurkSourceFile ,"--claim", "/tmp/state-claim.json" ] ""
+  le <- ask
+  verifier <- P.readProcess le ["eval","--expression", tempLurkSourceFile ,"--claim", "/tmp/state-claim.json" ] ""
   putStrLn $ show verifier 
-  proof <- P.readProcess lurkExecutable [ "prove", "--claim", tempClaimFile, "--proof", "/tmp/state-proof.json"] ""
+  proof <- P.readProcess le [ "prove", "--claim", tempClaimFile, "--proof", "/tmp/state-proof.json"] ""
   putStrLn $ show proof
 
 wrapIntoJson :: LurkSource -> T.Text
