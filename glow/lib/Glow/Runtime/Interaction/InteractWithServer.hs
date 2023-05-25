@@ -125,8 +125,13 @@ instance ParticipantM CmdLineWithServer LocalState where
     --   Just x -> return x
     
         
+-- runInteractionWithServer :: LocalInteractEnv -> UUID -> IO ()
+-- runInteractionWithServer lie cid =
+--   void (runRWST (runInteraction (Proxy :: Proxy LocalState) (Proxy :: Proxy CmdLineWithServer))
+--          (WithServerIEnv lie cid Nothing) initialLocalState)
+
 runInteractionWithServer :: LocalInteractEnv -> UUID -> IO ()
 runInteractionWithServer lie cid =
   void (runRWST (runInteraction (Proxy :: Proxy LocalState) (Proxy :: Proxy CmdLineWithServer))
          (WithServerIEnv lie cid Nothing) initialLocalState)
-  
+

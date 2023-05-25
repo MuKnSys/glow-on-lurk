@@ -18,7 +18,7 @@ import Prelude
 import Glow.Mock.Lurk.Consensus
 import Glow.Consensus.Lurk
 import Data.UUID
-
+import Control.Monad.Reader
 import Glow.Gerbil.Types (LedgerPubKey(LedgerPubKey))
 --import Data.Text as T
 import Data.Text.Lazy as T (toStrict,pack)
@@ -31,7 +31,6 @@ import Data.Maybe (fromMaybe)
 
 import Data.Aeson (encodeFile,decodeFileStrict)
 
---pawel
 import System.Directory (doesFileExist)
 
 instance Parsable UUID where
@@ -87,12 +86,17 @@ runServer = scotty 3000 $ do
     saveConsensusState :: ConsensusState -> IO () 
     saveConsensusState = encodeFile consensusStatePath
 
-    
+
+    consensusM :: ConsensusM Config
+    consensusM = do
+      c <- ask
+      return c 
+      
     atC :: CMS a -> ActionM a
     atC x =
         liftIO $ do
         s <- loadConsensusState
-        (a , s' , _) <- runRWST x () s
+        (a , s' , _) <- runRWST x (consensusM) s
         -- putStrLn $ show s'
         saveConsensusState s'
         return a

@@ -46,9 +46,8 @@ main = do
        ptcps <- participantsPrompt (Id <$> pc ^. pcParticipantNames)
        r <- deployContract pc params ptcps
        config <- LC.loadConfig config
-       runReaderT LC.foo config
        runReaderT LC.lurkExecutable config
-       runReaderT LC.callLurk config
+       LC.showLurkE
        case r of
          Left err -> error err
          Right cid -> putStrLn (UUID.toString cid)
@@ -61,12 +60,19 @@ main = do
        putStrLn "enter your role:"
        role <- getLine
        params <- map snd <$> parametersPrompt (paramsWithTypes pc)
-       void $ runInteractionWithServer
+       -- void $ runInteractionWithServer
+       --          (LocalInteractEnv
+       --           pc
+       --           (LedgerPubKey (pack pubK))
+       --           (pack role)
+       --           params) (fromJust $ UUID.fromString cid)
+      -- runReaderT $ LC.verifyCall config
+       runReaderT $ (runInteractionWithServer
                 (LocalInteractEnv
                  pc
                  (LedgerPubKey (pack pubK))
                  (pack role)
-                 params) (fromJust $ UUID.fromString cid) 
+                 params) (fromJust $ UUID.fromString cid) ) config
     ("interact-cli" : file : config : cid : pubK : role : paramsS : i : _) -> do 
         pc <- precomp file
         let params = read paramsS
