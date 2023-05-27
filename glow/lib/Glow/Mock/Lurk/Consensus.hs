@@ -139,10 +139,9 @@ verifyCall c p  = do
   cUuid <- ask
   -- path <- ask 
   -- pathh <- lift $ lurkExecutable1 (path :: Config)
-  -- let pathh = lurkExecutable1 path
   e <- gets ((^. initializationData) . ( M.! cUuid) . (^. contracts))
   s <- gets ((^. currentState) . (M.! cUuid  ) . (^. contracts))
-  x <- liftIO $ callLurk (e ^. stateTransitionVerifierSrc)  (mkLurkInput e s c) p 
+  x <- liftIO $ callLurk (e ^. stateTransitionVerifierSrc)  (mkLurkInput e s c) p
   case x of
     "T" -> do
       liftIO $ putStrLn $ "\nConfirmed validity of call, will execute state change."
@@ -198,15 +197,40 @@ getContractState x =
 
 
 interactWithContract :: UUID -> Call -> CMS ()
-interactWithContract u x = void $ runAtContract u $ do
-  c <- ask
-  le <- lurkExecutable1 c 
-  isVerified <- verifyCall x le
-  if isVerified
-  then liftIO $ putStrLn "verified!"
-  else liftIO $ putStrLn $ "not-verified!" ++ show x
-  when isVerified $ executeCall x
+interactWithContract u x =
+  void $ runAtContract u $ h
+  where
+    le :: ConsensusM FilePath
+    le = undefined
+      -- l' <- ask
+      -- return (lurkExecutable1 l')
 
+    -- g :: ConsensusM FilePath -> Bool
+    -- g f = do
+    --    let le :: ConsensusM FilePath
+    --        le = f 
+    --    b <- verifyCall x undefined
+    --    return b
+    g :: FilePath
+    g = undefined
+    h :: LMS ()
+    h = do
+      isVerified <- verifyCall x $ g
+      if isVerified
+      then liftIO $ putStrLn "verified!"
+      else liftIO $ putStrLn $ "not-verified!" ++ show x
+      when isVerified $ executeCall x
+
+
+-- interactWithContract :: UUID -> ConsensusM FilePath -> Call -> CMS ()
+-- interactWithContract u fp x = void $ runAtContract u $  do
+--     let ffp = fp
+--     ffp' <- ask
+--     isVerified <- verifyCall x ffp'
+--     if isVerified
+--     then liftIO $ putStrLn "verified!"
+--     else liftIO $ putStrLn $ "not-verified!" ++ show x
+--     when isVerified $ executeCall x
 
 overrideConsensusState :: ConsensusState -> CMS ()
 overrideConsensusState x = put x
@@ -336,7 +360,7 @@ callLurk :: LurkSource -> R.SExpr Atom -> FilePath -> IO String
 callLurk code call fp = do
   TIO.writeFile tempLurkSourceFile $ wrapIntoJson $ glowLurkWrapper code call
   let le = "some/directory"
-  r' <- P.readProcess fp ["eval","--expression",tempLurkSourceFile] ""
+  r' <- P.readProcess fp ["eval", "--expression", tempLurkSourceFile] ""
   let clear = clearCall r'
   let y = A.eitherDecode (BS.fromStrict $ BS.pack clear)
           >>= parseEither (\obj -> do                             

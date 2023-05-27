@@ -87,17 +87,21 @@ runServer = scotty 3000 $ do
     saveConsensusState = encodeFile consensusStatePath
 
 
-    consensusM :: ConsensusM Config
-    consensusM = do
-      c <- ask
-      return c 
+    -- consensusM :: ConsensusM ()
+    -- consensusM = do
+    --   c <- asks lurkExecutable1
+    --   -- cfp <- lurkExecutable1 c
+    --   return c 
       
     atC :: CMS a -> ActionM a
     atC x =
         liftIO $ do
         s <- loadConsensusState
-        (a , s' , _) <- runRWST x (consensusM) s
+        (a , s' , _) <- runRWST x r s
         -- putStrLn $ show s'
         saveConsensusState s'
         return a
+        where
+          r :: ConsensusM Config
+          r = undefined
 
